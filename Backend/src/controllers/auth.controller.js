@@ -1,0 +1,101 @@
+const userModel = require("../models/user.model.js");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+
+async function registerUser(req, res) {
+    const errors = {};
+    let { username, email, password } = req.body;
+   
+
+    const isAlreadyregistered = await userModel.findOne({
+        $or: [
+            { email: email },
+            { username: username }
+        ]
+    })
+
+
+    if (isAlreadyregistered) {
+        return res.status(409).json({
+            message: "User already registered",
+        })
+    }
+    const hasshedpassword = await bcrypt.hash(password, 10);
+
+    const user = await userModel.create({
+        username, email, password: hasshedpassword
+    })
+
+    const token = jwt.sign({
+        id: user._id,
+        email: user.email
+
+    }, process.env.SECRET_KEY, { expiresIn: "3d" });
+
+    res.cookie("token", token,
+        {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "strict",
+            maxAge: 3 * 24 * 60 * 60 * 1000
+        }
+    )
+
+    res.status(201).json({
+        mesage: "User is registered sucessfully "
+        , user: {
+            username: user.username,
+            email: user.email
+        }
+    })
+
+
+}
+
+async function loginUser(req, res) {
+    const { username, email, password } = req.body;
+    
+
+    const isAlreadyregistered = await userModel.findOne({
+        $or: [
+            { email: email },
+            { username: username }
+        ]
+    });
+
+    if (!isAlreadyregistered) {
+
+        return res.status(400).json({
+            message: "Invalid credentials 12"
+        })
+    }
+
+    const isMatch = await bcrypt.compare(password, isAlreadyregistered.password);
+
+    if (!isMatch) {
+        return res.status(400).json({
+            message: "Invalid credentials"
+        })
+    }
+
+    const token = jwt.sign({
+        id: isAlreadyregistered._id,
+        email: isAlreadyregistered.email
+
+    }, process.env.SECRET_KEY, { expiresIn: "3d" })
+
+    res.cookie("token", token,
+        {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "strict",
+            maxAge: 3 * 24 * 60 * 60 * 1000
+        }
+    )
+    res.status(200).json({
+        message: "user loggedIn sucessfully"
+    })
+
+}
+
+module.exports = { registerUser, loginUser };
