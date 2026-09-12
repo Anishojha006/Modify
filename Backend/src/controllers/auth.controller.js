@@ -5,7 +5,7 @@ const jwt = require("jsonwebtoken");
 async function registerUser(req, res) {
     const errors = {};
     let { username, email, password } = req.body;
-   
+
 
     const isAlreadyregistered = await userModel.findOne({
         $or: [
@@ -54,14 +54,14 @@ async function registerUser(req, res) {
 
 async function loginUser(req, res) {
     const { username, email, password } = req.body;
-    
+
 
     const isAlreadyregistered = await userModel.findOne({
         $or: [
             { email: email },
             { username: username }
         ]
-    });
+    }).select("+password");
 
     if (!isAlreadyregistered) {
 
@@ -98,4 +98,19 @@ async function loginUser(req, res) {
 
 }
 
-module.exports = { registerUser, loginUser };
+async function getme(req, res) {
+    const { id } = req.user;
+    console.log(req.user.id);
+    const user = await userModel.findById(id); 
+
+    res.status(200).json({
+        message: "User fetched successfully",
+        user
+    })
+}
+
+async function logout(req,res){
+    const token = req.cookies.token;
+    res.clearCookie("token");
+}
+module.exports = { registerUser, loginUser, getme , logout};
