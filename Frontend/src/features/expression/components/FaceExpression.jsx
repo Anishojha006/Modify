@@ -2,19 +2,11 @@ import { useEffect, useRef, useState } from "react";
 import { getExpression, getScore, detectExpression, setup } from "../utills/utils";
 
 const FaceExpression = () => {
-    // ==========================================
-    // REFS
-    // ==========================================
-
     const videoRef = useRef(null);
 
     const faceLandmarkerRef = useRef(null);
 
     const streamRef = useRef(null);
-
-    // ==========================================
-    // STATE
-    // ==========================================
 
     const [expression, setExpression] =
         useState("Camera loading...");
@@ -31,15 +23,7 @@ const FaceExpression = () => {
     useEffect(() => {
         setup({ videoRef, faceLandmarkerRef, streamRef, setError, setExpression, setCameraReady });
 
-        // ========================================
-        // CLEANUP
-        // ========================================
-
         return () => {
-            // ----------------------------------------
-            // Stop camera
-            // ----------------------------------------
-
             if (streamRef.current) {
                 streamRef.current
                     .getTracks()
@@ -51,10 +35,6 @@ const FaceExpression = () => {
                     null;
             }
 
-            // ----------------------------------------
-            // Remove video stream
-            // ----------------------------------------
-
             if (videoRef.current) {
                 videoRef.current.srcObject =
                     null;
@@ -62,10 +42,6 @@ const FaceExpression = () => {
                 videoRef.current.onloadedmetadata =
                     null;
             }
-
-            // ----------------------------------------
-            // Close MediaPipe
-            // ----------------------------------------
 
             if (
                 faceLandmarkerRef.current
@@ -77,10 +53,6 @@ const FaceExpression = () => {
             }
         };
     }, []);
-
-    // ==========================================
-    // UI
-    // ==========================================
 
     return (
         <div
@@ -102,18 +74,9 @@ const FaceExpression = () => {
                 background: "#f5f5f5"
             }}
         >
-
-            {/* =====================================
-          TITLE
-      ====================================== */}
-
             <h1>
                 Face Expression Detector
             </h1>
-
-            {/* =====================================
-          ERROR
-      ====================================== */}
 
             {error && (
                 <div
@@ -134,10 +97,6 @@ const FaceExpression = () => {
                     {error}
                 </div>
             )}
-
-            {/* =====================================
-          CAMERA
-      ====================================== */}
 
             <div
                 style={{
@@ -177,10 +136,6 @@ const FaceExpression = () => {
                 />
             </div>
 
-            {/* =====================================
-          EXPRESSION
-      ====================================== */}
-
             <div
                 style={{
                     padding: "20px 40px",
@@ -211,10 +166,6 @@ const FaceExpression = () => {
                     {expression}
                 </h2>
             </div>
-
-            {/* =====================================
-          DETECT BUTTON
-      ====================================== */}
 
             <button
                 onClick={(d) => { detectExpression({ videoRef, faceLandmarkerRef, streamRef, setLoading, setError, setExpression }) }}
@@ -249,7 +200,6 @@ const FaceExpression = () => {
                     ? "Detecting..."
                     : "Detect Expression"}
             </button>
-
         </div>
     );
 };

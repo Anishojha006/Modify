@@ -3,7 +3,6 @@ import {
   FilesetResolver
 } from "@mediapipe/tasks-vision";
 
-
 export function getScore(blendshapes, name) {
     const shape = blendshapes.find(
       (item) =>
@@ -17,15 +16,7 @@ export function getScore(blendshapes, name) {
     return 0;
   }
 
-  // ==========================================
-  // CALCULATE EXPRESSION
-  // ==========================================
-
-export  function getExpression(blendshapes) {
-    // ========================================
-    // SMILE
-    // ========================================
-
+export function getExpression(blendshapes) {
     const smileLeft = getScore(
       blendshapes,
       "mouthSmileLeft"
@@ -38,10 +29,6 @@ export  function getExpression(blendshapes) {
 
     const smile =
       (smileLeft + smileRight) / 2;
-
-    // ========================================
-    // FROWN
-    // ========================================
 
     const frownLeft = getScore(
       blendshapes,
@@ -56,27 +43,15 @@ export  function getExpression(blendshapes) {
     const frown =
       (frownLeft + frownRight) / 2;
 
-    // ========================================
-    // JAW OPEN
-    // ========================================
-
     const jawOpen = getScore(
       blendshapes,
       "jawOpen"
     );
 
-    // ========================================
-    // BROW UP
-    // ========================================
-
     const browUp = getScore(
       blendshapes,
       "browInnerUp"
     );
-
-    // ========================================
-    // BROW DOWN
-    // ========================================
 
     const browDownLeft = getScore(
       blendshapes,
@@ -92,10 +67,6 @@ export  function getExpression(blendshapes) {
       (browDownLeft +
         browDownRight) / 2;
 
-    // ========================================
-    // DEBUG
-    // ========================================
-
     console.log(
       "Expression values:",
       {
@@ -106,10 +77,6 @@ export  function getExpression(blendshapes) {
         browDown
       }
     );
-
-    // ========================================
-    // CLASSIFICATION
-    // ========================================
 
     if (smile > 0.5) {
       return "😊 Happy";
@@ -133,15 +100,7 @@ export  function getExpression(blendshapes) {
     return "😐 Neutral";
   }
 
-  // ==========================================
-  // DETECT EXPRESSION ONCE
-  // ==========================================
-
-export  function detectExpression({videoRef,faceLandmarkerRef,setLoading,setError,setExpression}) {
-    // ========================================
-    // CHECK MEDIAPIPE
-    // ========================================
-
+export function detectExpression({videoRef,faceLandmarkerRef,setLoading,setError,setExpression}) {
     if (!faceLandmarkerRef.current) {
       setError(
         "MediaPipe is not ready yet."
@@ -149,10 +108,6 @@ export  function detectExpression({videoRef,faceLandmarkerRef,setLoading,setErro
 
       return;
     }
-
-    // ========================================
-    // CHECK VIDEO
-    // ========================================
 
     if (!videoRef.current) {
       setError(
@@ -164,10 +119,6 @@ export  function detectExpression({videoRef,faceLandmarkerRef,setLoading,setErro
 
     const video =
       videoRef.current;
-
-    // ========================================
-    // CHECK VIDEO READY
-    // ========================================
 
     if (video.readyState < 2) {
       setError(
@@ -182,10 +133,6 @@ export  function detectExpression({videoRef,faceLandmarkerRef,setLoading,setErro
 
       setError("");
 
-      // ======================================
-      // TAKE ONE FRAME
-      // ======================================
-
       const result =
         faceLandmarkerRef.current.detectForVideo(
           video,
@@ -196,10 +143,6 @@ export  function detectExpression({videoRef,faceLandmarkerRef,setLoading,setErro
         "MediaPipe result:",
         result
       );
-
-      // ======================================
-      // CHECK FACE
-      // ======================================
 
       if (
         !result.faceBlendshapes ||
@@ -214,10 +157,6 @@ export  function detectExpression({videoRef,faceLandmarkerRef,setLoading,setErro
         return;
       }
 
-      // ======================================
-      // GET BLENDSHAPES
-      // ======================================
-
       const blendshapes =
         result.faceBlendshapes[0]
           .categories;
@@ -227,18 +166,10 @@ export  function detectExpression({videoRef,faceLandmarkerRef,setLoading,setErro
         blendshapes
       );
 
-      // ======================================
-      // CALCULATE EXPRESSION
-      // ======================================
-
       const detectedExpression =
         getExpression(
           blendshapes
         );
-
-      // ======================================
-      // DISPLAY RESULT
-      // ======================================
 
       setExpression(
         detectedExpression
@@ -260,17 +191,13 @@ export  function detectExpression({videoRef,faceLandmarkerRef,setLoading,setErro
     }
   }
 
-export  async function setup({videoRef,faceLandmarkerRef,streamRef,setError,setExpression,setCameraReady}) {
+export async function setup({videoRef,faceLandmarkerRef,streamRef,setError,setExpression,setCameraReady}) {
       try {
         setError("");
   
         setExpression(
           "⏳ Loading MediaPipe..."
         );
-  
-        // ========================================
-        // LOAD MEDIAPIPE
-        // ========================================
   
         console.log(
           "Loading MediaPipe..."
@@ -284,10 +211,6 @@ export  async function setup({videoRef,faceLandmarkerRef,streamRef,setError,setE
         console.log(
           "MediaPipe loaded"
         );
-  
-        // ========================================
-        // CREATE FACE LANDMARKER
-        // ========================================
   
         const faceLandmarker =
           await FaceLandmarker.createFromOptions(
@@ -321,10 +244,6 @@ export  async function setup({videoRef,faceLandmarkerRef,streamRef,setError,setE
         faceLandmarkerRef.current =
           faceLandmarker;
   
-        // ========================================
-        // START CAMERA
-        // ========================================
-  
         const stream =
           await navigator.mediaDevices.getUserMedia(
             {
@@ -347,19 +266,11 @@ export  async function setup({videoRef,faceLandmarkerRef,streamRef,setError,setE
         streamRef.current =
           stream;
   
-        // ========================================
-        // CONNECT STREAM
-        // ========================================
-  
         const video =
           videoRef.current;
   
         video.srcObject =
           stream;
-  
-        // ========================================
-        // VIDEO READY
-        // ========================================
   
         video.onloadedmetadata =
           () => {
@@ -392,7 +303,3 @@ export  async function setup({videoRef,faceLandmarkerRef,streamRef,setError,setE
         );
       }
     }
-
-    /**
-     * Black box programming is the method in which we know what an function is doing but donot know how it exactly works internally
-     */
