@@ -30,7 +30,6 @@ const Register = () => {
     });
 
 
-    // PASSWORD VISIBILITY
 
     const [
         showPassword,
@@ -44,16 +43,13 @@ const Register = () => {
     ] = useState(false);
 
 
-    // ERROR
+
 
     const [
         error,
         setError,
     ] = useState("");
-
-
-    // INPUT CHANGE
-
+    
     const handleChange = (e) => {
 
         const {
@@ -72,7 +68,6 @@ const Register = () => {
     };
 
 
-    // FORM SUBMIT
 
     const handleSubmit = async (e) => {
 
@@ -87,7 +82,7 @@ const Register = () => {
         } = formData;
 
 
-        // EMPTY FIELD CHECK
+   
 
         if (
             !username.trim() ||
@@ -116,8 +111,6 @@ const Register = () => {
         }
 
 
-        // EMAIL VALIDATION
-
         const emailRegex =
             /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -132,7 +125,7 @@ const Register = () => {
         }
 
 
-        // PASSWORD VALIDATION
+    
 
         if (password.length < 8) {
 
@@ -144,7 +137,7 @@ const Register = () => {
         }
 
 
-        // CONFIRM PASSWORD
+      
 
         if (password !== confirmPassword) {
 
@@ -162,7 +155,7 @@ const Register = () => {
 
             setError("");
 
-
+ console.log("efsefdse");
             await handleRegister({
 
                 username:
@@ -176,9 +169,9 @@ const Register = () => {
             });
 
 
-            // SUCCESS
+         
 
-            navigate("/login", {
+            navigate("/dashboad", {
                 replace: true,
             });
 
