@@ -55,67 +55,20 @@ const FaceExpression = () => {
     }, []);
 
     return (
-        <div
-            style={{
-                minHeight: "100vh",
-
-                display: "flex",
-
-                flexDirection: "column",
-
-                alignItems: "center",
-
-                justifyContent: "center",
-
-                gap: "20px",
-
-                padding: "20px",
-
-                background: "#f5f5f5"
-            }}
-        >
-            <h1>
-                Face Expression Detector
-            </h1>
+        <main className="expression-app">
+            <header className="expression-header">
+                <p className="eyebrow">Real-time computer vision</p>
+                <h1>Face Expression Detector</h1>
+                <p className="intro">Use your camera to identify the expression in front of you.</p>
+            </header>
 
             {error && (
-                <div
-                    style={{
-                        padding: "12px 20px",
-
-                        background: "#ffe5e5",
-
-                        color: "#c00000",
-
-                        borderRadius: "8px",
-
-                        maxWidth: "600px",
-
-                        textAlign: "center"
-                    }}
-                >
+                <div className="expression-error" role="alert">
                     {error}
                 </div>
             )}
 
-            <div
-                style={{
-                    width: "640px",
-
-                    maxWidth: "90vw",
-
-                    aspectRatio: "4 / 3",
-
-                    background: "#111",
-
-                    borderRadius: "15px",
-
-                    overflow: "hidden",
-
-                    boxShadow:
-                        "0 10px 30px rgba(0,0,0,0.15)"
-                }}
-            >
+            <section className="camera-stage" aria-label="Camera preview">
                 <video
                     ref={videoRef}
                     autoPlay
@@ -123,84 +76,29 @@ const FaceExpression = () => {
                     playsInline
                     width="640"
                     height="480"
-                    style={{
-                        width: "100%",
-
-                        height: "100%",
-
-                        objectFit: "cover",
-
-                        transform:
-                            "scaleX(-1)"
-                    }}
+                    className="camera-video"
                 />
-            </div>
+                {!cameraReady && <div className="camera-overlay">Preparing camera...</div>}
+            </section>
 
-            <div
-                style={{
-                    padding: "20px 40px",
-
-                    minWidth: "350px",
-
-                    background: "white",
-
-                    borderRadius: "15px",
-
-                    textAlign: "center",
-
-                    boxShadow:
-                        "0 5px 20px rgba(0,0,0,0.08)"
-                }}
-            >
-                <p
-                    style={{
-                        color: "#777",
-
-                        marginBottom: "10px"
-                    }}
-                >
-                    Detected Expression
-                </p>
-
-                <h2>
-                    {expression}
-                </h2>
-            </div>
+            <section className="expression-result" aria-live="polite">
+                <p className="result-label">Detected expression</p>
+                <h2>{expression}</h2>
+            </section>
 
             <button
-                onClick={(d) => { detectExpression({ videoRef, faceLandmarkerRef, streamRef, setLoading, setError, setExpression }) }}
+                onClick={() => { detectExpression({ videoRef, faceLandmarkerRef, streamRef, setLoading, setError, setExpression }) }}
                 disabled={
                     !cameraReady || loading
                 }
-                style={{
-                    padding: "12px 25px",
-
-                    border: "none",
-
-                    borderRadius: "8px",
-
-                    background:
-                        !cameraReady || loading
-                            ? "#aaa"
-                            : "#1976d2",
-
-                    color: "white",
-
-                    fontSize: "16px",
-
-                    fontWeight: "600",
-
-                    cursor:
-                        !cameraReady || loading
-                            ? "not-allowed"
-                            : "pointer"
-                }}
+                className="detect-button"
             >
                 {loading
                     ? "Detecting..."
                     : "Detect Expression"}
             </button>
-        </div>
+            <p className="privacy-note">Your camera feed stays in this browser.</p>
+        </main>
     );
 };
 
