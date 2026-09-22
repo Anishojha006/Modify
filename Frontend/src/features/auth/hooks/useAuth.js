@@ -15,6 +15,7 @@ export const useProfile = () => {
         );
     }
 
+    
     const {
         setLoading,
         setUser,
@@ -101,3 +102,5 @@ export const useProfile = () => {
         handleRegister
     };
 };
+
+export const useAuth = useProfile;

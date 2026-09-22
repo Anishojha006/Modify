@@ -1,4 +1,5 @@
 const userModel = require("../models/user.model.js");
+const blaclistModel = require("../models/blacklist.model.js");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
@@ -99,6 +100,7 @@ async function loginUser(req, res) {
 }
 
 async function getme(req, res) {
+    
     const { id } = req.user;
     console.log(req.user.id);
     const user = await userModel.findById(id); 
@@ -112,5 +114,12 @@ async function getme(req, res) {
 async function logout(req,res){
     const token = req.cookies.token;
     res.clearCookie("token");
+    await blaclistModel.create({
+        token
+    });
+
+    res.status(201).json({
+        message:"successfully logout."
+    })
 }
 module.exports = { registerUser, loginUser, getme , logout};

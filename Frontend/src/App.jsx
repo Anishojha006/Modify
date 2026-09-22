@@ -1,15 +1,22 @@
-import { useState } from 'react'
-import './App.css'
-import Page from "./features/auth/pages/auth.jsx";
+import { BrowserRouter } from "react-router-dom";
+
+import "./App.css";
+
 import { AuthProvider } from "./features/auth/auth.context.jsx";
+import AppRoutes from "./routes/Approute.jsx";
 
 function App() {
+    return (
+        <BrowserRouter>
 
-  return (
-    <AuthProvider>
-      <Page />
-    </AuthProvider>
-  )
+            <AuthProvider>
+
+                <AppRoutes />
+
+            </AuthProvider>
+
+        </BrowserRouter>
+    );
 }
 
-export default App
+export default App;

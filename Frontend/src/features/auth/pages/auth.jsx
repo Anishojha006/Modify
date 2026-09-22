@@ -1,10 +1,27 @@
+import {
+    useNavigate,
+    Link,
+} from "react-router-dom";
 
 import { useState } from "react";
+
 import "./Register.scss";
-import { useProfile } from '../hooks/useAuth.js'
+
+import { useAuth } from "../hooks/useAuth.js";
+
 
 const Register = () => {
-    const {  user,loading, handleLogin , handleRegister } = useProfile();
+
+    const navigate = useNavigate();
+
+    const {
+        loading,
+        handleRegister,
+    } = useAuth();
+
+
+    // FORM DATA
+
     const [formData, setFormData] = useState({
         username: "",
         email: "",
@@ -12,38 +29,55 @@ const Register = () => {
         confirmPassword: "",
     });
 
-    const register = async (username, email, password) => {
-        try {
 
-            await handleRegister(username, email, password);
+    // PASSWORD VISIBILITY
 
-        }
-        catch (err) {
-            throw error("Internal server error");
-        }
+    const [
+        showPassword,
+        setShowPassword,
+    ] = useState(false);
 
 
-    }
-   if(loading){
-    
-   }
-    const [showPassword, setShowPassword] = useState(false);
-    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-    const [error, setError] = useState("");
+    const [
+        showConfirmPassword,
+        setShowConfirmPassword,
+    ] = useState(false);
+
+
+    // ERROR
+
+    const [
+        error,
+        setError,
+    ] = useState("");
+
+
+    // INPUT CHANGE
 
     const handleChange = (e) => {
-        const { name, value } = e.target;
+
+        const {
+            name,
+            value,
+        } = e.target;
+
 
         setFormData((prev) => ({
             ...prev,
             [name]: value,
         }));
 
+
         setError("");
     };
 
-    const handleSubmit = (e) => {
+
+    // FORM SUBMIT
+
+    const handleSubmit = async (e) => {
+
         e.preventDefault();
+
 
         const {
             username,
@@ -52,52 +86,153 @@ const Register = () => {
             confirmPassword,
         } = formData;
 
-        if (!username || !email || !password || !confirmPassword) {
-            setError("Please fill in all fields.");
+
+        // EMPTY FIELD CHECK
+
+        if (
+            !username.trim() ||
+            !email.trim() ||
+            !password ||
+            !confirmPassword
+        ) {
+
+            setError(
+                "Please fill in all fields."
+            );
+
             return;
         }
 
-        if (username.length < 3) {
-            setError("Username must contain at least 3 characters.");
+
+        // USERNAME VALIDATION
+
+        if (username.trim().length < 3) {
+
+            setError(
+                "Username must contain at least 3 characters."
+            );
+
             return;
         }
+
+
+        // EMAIL VALIDATION
+
+        const emailRegex =
+            /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+
+        if (!emailRegex.test(email)) {
+
+            setError(
+                "Please enter a valid email address."
+            );
+
+            return;
+        }
+
+
+        // PASSWORD VALIDATION
 
         if (password.length < 8) {
-            setError("Password must contain at least 8 characters.");
+
+            setError(
+                "Password must contain at least 8 characters."
+            );
+
             return;
         }
+
+
+        // CONFIRM PASSWORD
 
         if (password !== confirmPassword) {
-            setError("Passwords do not match.");
+
+            setError(
+                "Passwords do not match."
+            );
+
             return;
         }
 
-        console.log("Registration Data:", {
-            username,
-            email,
-            password,
-        });
 
+        // API REQUEST
+
+        try {
+
+            setError("");
+
+
+            await handleRegister({
+
+                username:
+                    username.trim(),
+
+                email:
+                    email.trim(),
+
+                password,
+
+            });
+
+
+            // SUCCESS
+
+            navigate("/login", {
+                replace: true,
+            });
+
+
+        } catch (err) {
+
+            console.error(
+                "Registration failed:",
+                err
+            );
+
+
+            setError(
+                err?.response?.data?.message ||
+                err?.response?.data?.error ||
+                "Registration failed. Please try again."
+            );
+        }
     };
 
+
     return (
+
         <div className="register-page">
 
             <div className="register-card">
 
+
+                {/* HEADER */}
+
                 <div className="register-header">
 
+                    <div className="logo-border">
 
-                    <div className="logo">
-                        Moodify
+                        <div className="logo">
+                            Moodify
+                        </div>
+
                     </div>
 
-                    <h1>Create your account</h1>
+
+                    <h1>
+                        Create your account
+                    </h1>
+
 
                     <p>
                         Join us today and get started.
                     </p>
+
                 </div>
+
+
+                {/* FORM */}
 
                 <form
                     className="register-form"
@@ -105,10 +240,14 @@ const Register = () => {
                 >
 
 
+                    {/* USERNAME */}
+
                     <div className="form-group">
+
                         <label htmlFor="username">
                             Username
                         </label>
+
 
                         <input
                             id="username"
@@ -118,14 +257,20 @@ const Register = () => {
                             value={formData.username}
                             onChange={handleChange}
                             autoComplete="username"
+                            disabled={loading}
                         />
+
                     </div>
 
 
+                    {/* EMAIL */}
+
                     <div className="form-group">
+
                         <label htmlFor="email">
                             Email
                         </label>
+
 
                         <input
                             id="email"
@@ -135,15 +280,23 @@ const Register = () => {
                             value={formData.email}
                             onChange={handleChange}
                             autoComplete="email"
+                            disabled={loading}
                         />
+
                     </div>
 
+
+                    {/* PASSWORD */}
+
                     <div className="form-group">
+
                         <label htmlFor="password">
                             Password
                         </label>
 
+
                         <div className="password-wrapper">
+
                             <input
                                 id="password"
                                 name="password"
@@ -156,33 +309,48 @@ const Register = () => {
                                 value={formData.password}
                                 onChange={handleChange}
                                 autoComplete="new-password"
+                                disabled={loading}
                             />
+
 
                             <button
                                 type="button"
                                 className="password-toggle"
                                 onClick={() =>
                                     setShowPassword(
-                                        !showPassword
+                                        (prev) =>
+                                            !prev
                                     )
                                 }
                             >
-                                {showPassword ? "Hide" : "Show"}
+
+                                {showPassword
+                                    ? "Hide"
+                                    : "Show"}
+
                             </button>
+
                         </div>
+
 
                         <small>
                             Minimum 8 characters
                         </small>
+
                     </div>
 
-                    {/* Confirm Password */}
+
+                    {/* CONFIRM PASSWORD */}
+
                     <div className="form-group">
+
                         <label htmlFor="confirmPassword">
                             Confirm Password
                         </label>
 
+
                         <div className="password-wrapper">
+
                             <input
                                 id="confirmPassword"
                                 name="confirmPassword"
@@ -192,56 +360,103 @@ const Register = () => {
                                         : "password"
                                 }
                                 placeholder="Confirm your password"
-                                value={formData.confirmPassword}
+                                value={
+                                    formData.confirmPassword
+                                }
                                 onChange={handleChange}
                                 autoComplete="new-password"
+                                disabled={loading}
                             />
+
 
                             <button
                                 type="button"
                                 className="password-toggle"
                                 onClick={() =>
                                     setShowConfirmPassword(
-                                        !showConfirmPassword
+                                        (prev) =>
+                                            !prev
                                     )
                                 }
                             >
+
                                 {showConfirmPassword
                                     ? "Hide"
                                     : "Show"}
+
                             </button>
+
                         </div>
+
                     </div>
 
-                    {/* Error */}
+
+                    {/* ERROR */}
+
                     {error && (
-                        <div className="form-error">
+
+                        <div
+                            className="form-error"
+                            role="alert"
+                        >
                             {error}
                         </div>
+
                     )}
 
-                    {/* Submit */}
+
+                    {/* SUBMIT */}
+
                     <button
                         type="submit"
                         className="register-button"
+                        disabled={loading}
                     >
-                        Create Account
+
+                        {loading
+                            ? "Creating Account..."
+                            : "Create Account"}
+
                     </button>
 
                 </form>
 
+
+                {/* LOGIN */}
+
                 <div className="login-link">
-                    Already have an account?
-                    <a href="/login">
+
+                    <span>
+                        Already have an account?
+                    </span>
+
+
+                    <Link to="/login">
                         Login
-                    </a>
+                    </Link>
+
                 </div>
 
+
+                {/* TERMS */}
+
                 <div className="terms">
-                    By creating an account, you agree to our
-                    <a href="/terms"> Terms of Service </a>
-                    and
-                    <a href="/privacy"> Privacy Policy</a>.
+
+                    By creating an account, you agree
+                    to our{" "}
+
+                    <Link to="/terms">
+                        Terms of Service
+                    </Link>
+
+                    {" "}and{" "}
+
+                    <Link to="/privacy">
+                        Privacy Policy
+                    </Link>
+
+                    .
+
                 </div>
 
             </div>
@@ -250,5 +465,5 @@ const Register = () => {
     );
 };
 
-export default Register;
 
+export default Register;

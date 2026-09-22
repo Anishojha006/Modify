@@ -6,4 +6,3 @@ const connectToDB= async ()=>{
     console.log("Connected to  database"); 
 }
 module.exports = connectToDB;
-
