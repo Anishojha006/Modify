@@ -15,7 +15,7 @@ export const useProfile = () => {
         );
     }
 
-    
+
     const {
         setLoading,
         setUser,

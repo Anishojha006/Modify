@@ -94,7 +94,11 @@ async function loginUser(req, res) {
         }
     )
     res.status(200).json({
-        message: "user loggedIn sucessfully"
+        message: "user loggedIn sucessfully",
+        user: {
+            username: isAlreadyregistered.username,
+            email: isAlreadyregistered.email
+        }
     })
 
 }
@@ -122,4 +126,6 @@ async function logout(req,res){
         message:"successfully logout."
     })
 }
+
+
 module.exports = { registerUser, loginUser, getme , logout};

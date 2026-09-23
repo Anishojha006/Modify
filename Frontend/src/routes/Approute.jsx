@@ -1,22 +1,19 @@
 import { Routes, Route } from "react-router-dom";
-
-// import Login from "../features/auth/pages/Login.jsx";
-import Register from "../features/auth/pages/auth.jsx"
+import Register from "../features/auth/pages/Register.jsx"
 import FaceExpression from "../features/expression/components/FaceExpression.jsx";
+import Login from "../features/auth/pages/Login.jsx"
 
 const AppRoutes = () => {
     return (
         <Routes>
 
-            {/* <Route
-                path="/login"
-                element={<Login />}
-            /> */}
-
             <Route
-                path="/"
-                element={<Register />}
+                path="/login"
+                element={<Login/>}
+                
             />
+
+        
 
             <Route
                 path="/register"

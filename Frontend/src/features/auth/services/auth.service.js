@@ -30,7 +30,6 @@ const request = async (path, body) => {
     }
 };
 
-
 export async function register({
     username,
     email,

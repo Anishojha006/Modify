@@ -12,5 +12,9 @@ Authrouter.get("/get-me", AuthMiddleware.authUser, authController.getme);
 Authrouter.get("/logout",authController.logout);
 
 
+
+
+
+
 module.exports = Authrouter;
 
