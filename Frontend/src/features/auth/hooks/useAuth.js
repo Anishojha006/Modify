@@ -1,12 +1,14 @@
-import { useContext } from "react";
+import { useContext, useEffect } from "react";
 import { AuthContext } from "../auth.context.jsx";
+import { useNavigate } from "react-router-dom";
 import {
+    getme,
     register,
     login
 } from "../services/auth.service.js";
 
 export const useProfile = () => {
-
+    const navigate = useNavigate();
     const context = useContext(AuthContext);
 
     if (!context) {
@@ -94,8 +96,32 @@ export const useProfile = () => {
 
         }
     };
+    
+    const handlegetme = async ()=>{
+        setLoading(true);
+        try{
+            const response = await getme();
+            console.log(response);
+            setUser(response.user);
+            navigate("/dashboad");
+
+        }
+        catch(err){
+            console.log(err.message);
+        }
+        finally{
+            setLoading(false);
+        }
+    } 
+
+useEffect(() => {
+  
+
+handlegetme();
+}, [])
 
     return {
+        handlegetme,
         user,
         loading,
         handleLogin,

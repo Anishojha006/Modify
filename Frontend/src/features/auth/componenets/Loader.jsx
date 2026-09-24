@@ -1,11 +1,11 @@
 import "./Loader.scss";
 
 
-const Loader = () => {
+const Loader = ({text}) => {
     return (
         <div className="loader-overlay" role="status" aria-live="polite">
             <div className="loader"></div>
-            <span>Signing you in...</span>
+            <span>{text}</span>
         </div>
     );
 };

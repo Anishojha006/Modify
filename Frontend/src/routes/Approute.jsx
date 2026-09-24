@@ -6,7 +6,12 @@ import Login from "../features/auth/pages/Login.jsx"
 const AppRoutes = () => {
     return (
         <Routes>
-
+         
+           <Route
+                path="/"
+                element={<Login/>}
+                
+            />
             <Route
                 path="/login"
                 element={<Login/>}

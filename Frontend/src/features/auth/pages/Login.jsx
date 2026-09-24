@@ -9,6 +9,8 @@ const Login = () => {
         loading,
         handleLogin,
     } = useAuth();
+  
+
 
     const navigate = useNavigate();
 
@@ -49,7 +51,7 @@ const Login = () => {
     };
 
     if (loading) {
-        return <Loader />;
+        return <Loader text={"Logging in ..."} />;
     }
 
     return (

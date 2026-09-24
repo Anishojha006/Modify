@@ -1,56 +1,38 @@
-import axios from "axios";
+import api from "./api.js";
 
-const API_URL = import.meta.env.VITE_API_URL;
-
-console.log(API_URL);
-
-const request = async (path, body) => {
-    try {
-        const response = await axios.post(
-            `${API_URL}${path}`,
-            body,
-            {
-                withCredentials: true,
-                headers: {
-                    "Content-Type": "application/json",
-                },
-            }
-        );
-
-        return response.data;
-
-    } catch (error) {
-        console.error("Auth request failed:", error);
-
-        throw new Error(
-            error.response?.data?.message ||
-            error.message ||
-            "Request failed"
-        );
-    }
-};
 
 export async function register({
     username,
     email,
-    password
+    password,
 }) {
-    return request("/register", {
+    const response = await api.post("/register", {
         username,
         email,
-        password
+        password,
     });
+
+    return response.data;
 }
 
 
 export async function login({
     username,
     email,
-    password
+    password,
 }) {
-    return request("/login", {
+    const response = await api.post("/login", {
         username,
         email,
-        password
+        password,
     });
+
+    return response.data;
+}
+
+
+export async function getme() {
+    const response = await api.get("/get-me");
+
+    return response.data;
 }
