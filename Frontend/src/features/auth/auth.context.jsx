@@ -37,3 +37,4 @@ export const AuthProvider = ({ children }) => {
 };
 
 export const AuthContextProvider = AuthContext;
+
