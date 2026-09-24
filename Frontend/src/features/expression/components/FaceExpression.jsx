@@ -1,17 +1,18 @@
 import { useEffect, useRef, useState } from "react";
-import { getExpression, getScore, detectExpression, setup } from "../utills/utils";
+import { detectExpression, setup } from "../utills/utils";
+import { useAuth } from "../../auth/hooks/useAuth.js"
+import Loader from "../../auth/componenets/Loader.jsx";
 
 const FaceExpression = () => {
+    const { loading: authLoading } = useAuth();
     const videoRef = useRef(null);
-
     const faceLandmarkerRef = useRef(null);
-
     const streamRef = useRef(null);
 
     const [expression, setExpression] =
         useState("Camera loading...");
 
-    const [loading, setLoading] =
+    const [detecting, setDetecting] =
         useState(false);
 
     const [error, setError] =
@@ -43,9 +44,7 @@ const FaceExpression = () => {
                     null;
             }
 
-            if (
-                faceLandmarkerRef.current
-            ) {
+            if (faceLandmarkerRef.current) {
                 faceLandmarkerRef.current.close();
 
                 faceLandmarkerRef.current =
@@ -53,6 +52,10 @@ const FaceExpression = () => {
             }
         };
     }, []);
+
+    if (authLoading) {
+        return <Loader text="Checking your session..." />;
+    }
 
     return (
         <main className="expression-app">
@@ -87,13 +90,13 @@ const FaceExpression = () => {
             </section>
 
             <button
-                onClick={() => { detectExpression({ videoRef, faceLandmarkerRef, streamRef, setLoading, setError, setExpression }) }}
+                onClick={() => { detectExpression({ videoRef, faceLandmarkerRef, setLoading: setDetecting, setError, setExpression }) }}
                 disabled={
-                    !cameraReady || loading
+                    !cameraReady || detecting
                 }
                 className="detect-button"
             >
-                {loading
+                {detecting
                     ? "Detecting..."
                     : "Detect Expression"}
             </button>
