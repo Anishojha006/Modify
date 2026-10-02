@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useAuth } from "../hooks/useAuth.js";
 import "./login.scss";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Loader from "../componenets/Loader.jsx";
 
 const Login = () => {
@@ -118,6 +118,8 @@ const Login = () => {
                 </button>
 
             </form>
+            <div>Have no account then please  <Link to="/register" >Register</Link></div>
+           
         </div>
     );
 };

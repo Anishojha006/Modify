@@ -3,23 +3,24 @@ import Register from "../features/auth/pages/Register.jsx"
 import FaceExpression from "../features/expression/components/FaceExpression.jsx";
 import Login from "../features/auth/pages/Login.jsx"
 import ProtectedRoute from "./ProtectedRoute.jsx";
+import NotFound from "../features/expression/pages/NotFound.jsx";
 
 const AppRoutes = () => {
     return (
         <Routes>
-         
-           <Route
+
+            <Route
                 path="/"
-                element={<Login/>}
-                
+                element={<Login />}
+
             />
             <Route
                 path="/login"
-                element={<Login/>}
-                
+                element={<Login />}
+
             />
 
-        
+
 
             <Route
                 path="/register"
@@ -34,6 +35,8 @@ const AppRoutes = () => {
                     </ProtectedRoute>
                 }
             />
+
+            <Route path="*" element={<NotFound />} />
 
         </Routes>
     );

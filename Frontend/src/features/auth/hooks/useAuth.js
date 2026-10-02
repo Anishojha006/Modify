@@ -1,6 +1,7 @@
 import { useContext } from "react";
 import { AuthContext } from "../auth.context.jsx";
 import {
+    logout,
     register,
     login
 } from "../services/auth.service.js";
@@ -94,7 +95,22 @@ export const useProfile = () => {
         }
     };
     
+    const handleLogout = async () => {
+        setLoading(true);
+
+        try {
+            const response = await logout();
+            setUser(null);
+            return response;
+        } catch (err) {
+            console.log("server error", err);
+            throw err;
+        } finally {
+            setLoading(false);
+        }
+    };
     return {
+        handleLogout,
         user,
         loading,
         handleLogin,

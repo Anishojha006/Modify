@@ -1,10 +1,12 @@
 import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { detectExpression, setup } from "../utills/utils";
 import { useAuth } from "../../auth/hooks/useAuth.js"
 import Loader from "../../auth/componenets/Loader.jsx";
 
 const FaceExpression = () => {
-    const { loading: authLoading } = useAuth();
+    const navigate = useNavigate();
+    const { loading: authLoading, setUser, handleLogout } = useAuth();
     const videoRef = useRef(null);
     const faceLandmarkerRef = useRef(null);
     const streamRef = useRef(null);
@@ -19,6 +21,9 @@ const FaceExpression = () => {
         useState("");
 
     const [cameraReady, setCameraReady] =
+        useState(false);
+
+    const [isLoggingOut, setIsLoggingOut] =
         useState(false);
 
     useEffect(() => {
@@ -53,11 +58,41 @@ const FaceExpression = () => {
         };
     }, []);
 
+    const handleLogoutProcess = async () => {
+        if (isLoggingOut) return;
+
+        setIsLoggingOut(true);
+
+        try {
+            await handleLogout();
+
+            window.setTimeout(() => {
+                navigate("/login", { replace: true });
+            }, 220);
+        } catch (error) {
+            console.error("Logout failed:", error);
+            setIsLoggingOut(false);
+        }
+    };
+
     if (authLoading) {
         return <Loader text="Checking your session..." />;
     }
-
+   
     return (
+      <>
+        <div className="logout-bar">
+            <div className="logout-badge">Face AI</div>
+            <button
+                type="button"
+                className={`logout-button${isLoggingOut ? " is-logging-out" : ""}`}
+                onClick={handleLogoutProcess}
+                aria-label="Log out of the app"
+                disabled={isLoggingOut}
+            >
+                {isLoggingOut ? "Logging out..." : "Logout"}
+            </button>
+        </div>
         <main className="expression-app">
             <header className="expression-header">
                 <p className="eyebrow">Real-time computer vision</p>
@@ -101,7 +136,7 @@ const FaceExpression = () => {
                     : "Detect Expression"}
             </button>
             <p className="privacy-note">Your camera feed stays in this browser.</p>
-        </main>
+        </main></>
     );
 };
 
