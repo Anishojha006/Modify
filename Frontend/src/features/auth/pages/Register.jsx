@@ -5,7 +5,8 @@ import {
 
 import { useState } from "react";
 
-import "./Register.scss";
+import "../style/Register.scss";
+import "../style/buttons/RegisterButtons.scss";
 
 import { useAuth } from "../hooks/useAuth.js";
 
@@ -155,7 +156,6 @@ const Register = () => {
 
             setError("");
 
- console.log("efsefdse");
             await handleRegister({
 
                 username:
@@ -177,12 +177,6 @@ const Register = () => {
 
 
         } catch (err) {
-
-            console.error(
-                "Registration failed:",
-                err
-            );
-
 
             setError(
                 err?.response?.data?.message ||

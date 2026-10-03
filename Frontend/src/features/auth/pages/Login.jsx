@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useAuth } from "../hooks/useAuth.js";
-import "./login.scss";
+import "../style/login.scss";
+import "../style/buttons/LoginButtons.scss";
 import { Link, useNavigate } from "react-router-dom";
 import Loader from "../componenets/Loader.jsx";
 
@@ -15,16 +16,13 @@ const Login = () => {
     const navigate = useNavigate();
 
     const [key, setKey] = useState("");
-    const [email, setEmail] = useState("");
+    const [loginMethod, setLoginMethod] = useState("email");
+    const [identifier, setIdentifier] = useState("");
     const [ShowPassword, setShowPassword] = useState(false);
     const [error, setError] = useState("");
 
     const handlepassword = (password) => {
         setKey(password);
-    };
-
-    const handleEmail = (email) => {
-        setEmail(email);
     };
 
     const handleShowPassword = () => {
@@ -37,7 +35,7 @@ const Login = () => {
 
         try {
             await handleLogin({
-                email: email.trim(),
+                [loginMethod]: identifier.trim(),
                 password: key,
             });
 
@@ -51,7 +49,7 @@ const Login = () => {
     };
 
     if (loading) {
-        return <Loader text={"Logging in ..."} />;
+        return <Loader text={"Loading ..."} />;
     }
 
     return (
@@ -65,18 +63,38 @@ const Login = () => {
 
             <form onSubmit={handleFormSubmit}>
 
-                <div className="email-field">
-                    <label htmlFor="email">
-                        Email
+                <div className="login-identifier-field">
+                    <div className="login-method-options" role="group" aria-label="Login method">
+                        <button
+                            type="button"
+                            className={loginMethod === "email" ? "is-selected" : ""}
+                            aria-pressed={loginMethod === "email"}
+                            onClick={() => setLoginMethod("email")}
+                        >
+                            Email
+                        </button>
+                        <button
+                            type="button"
+                            className={loginMethod === "username" ? "is-selected" : ""}
+                            aria-pressed={loginMethod === "username"}
+                            onClick={() => setLoginMethod("username")}
+                        >
+                            Username
+                        </button>
+                    </div>
+
+                    <label htmlFor="login-identifier">
+                        {loginMethod === "email" ? "Email" : "Username"}
                     </label>
 
                     <input
                         required
-                        type="email"
-                        id="email"
-                        value={email}
+                        type={loginMethod === "email" ? "email" : "text"}
+                        id="login-identifier"
+                        autoComplete={loginMethod === "email" ? "email" : "username"}
+                        value={identifier}
                         onChange={(e) => {
-                            setEmail(e.target.value);
+                            setIdentifier(e.target.value);
                         }}
                     />
                 </div>

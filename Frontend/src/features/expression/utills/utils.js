@@ -67,17 +67,6 @@ export function getExpression(blendshapes) {
       (browDownLeft +
         browDownRight) / 2;
 
-    console.log(
-      "Expression values:",
-      {
-        smile,
-        frown,
-        jawOpen,
-        browUp,
-        browDown
-      }
-    );
-
     if (smile > 0.5) {
       return "😊 Happy";
     }
@@ -139,11 +128,6 @@ export function detectExpression({videoRef,faceLandmarkerRef,setLoading,setError
           performance.now()
         );
 
-      console.log(
-        "MediaPipe result:",
-        result
-      );
-
       if (
         !result.faceBlendshapes ||
         result.faceBlendshapes.length === 0
@@ -160,11 +144,6 @@ export function detectExpression({videoRef,faceLandmarkerRef,setLoading,setError
       const blendshapes =
         result.faceBlendshapes[0]
           .categories;
-
-      console.log(
-        "Blendshapes:",
-        blendshapes
-      );
 
       const detectedExpression =
         getExpression(
@@ -191,7 +170,10 @@ export function detectExpression({videoRef,faceLandmarkerRef,setLoading,setError
     }
   }
 
-export async function setup({videoRef,faceLandmarkerRef,streamRef,setError,setExpression,setCameraReady}) {
+export async function setup({videoRef,faceLandmarkerRef,streamRef,setupToken,setError,setExpression,setCameraReady}) {
+      let faceLandmarker;
+      let stream;
+
       try {
         setError("");
   
@@ -211,8 +193,12 @@ export async function setup({videoRef,faceLandmarkerRef,streamRef,setError,setEx
         console.log(
           "MediaPipe loaded"
         );
+
+        if (setupToken.cancelled) {
+          return;
+        }
   
-        const faceLandmarker =
+        faceLandmarker =
           await FaceLandmarker.createFromOptions(
             vision,
             {
@@ -236,6 +222,11 @@ export async function setup({videoRef,faceLandmarkerRef,streamRef,setError,setEx
               minTrackingConfidence: 0.5
             }
           );
+
+        if (setupToken.cancelled) {
+          faceLandmarker.close();
+          return;
+        }
   
         console.log(
           "FaceLandmarker created"
@@ -244,7 +235,7 @@ export async function setup({videoRef,faceLandmarkerRef,streamRef,setError,setEx
         faceLandmarkerRef.current =
           faceLandmarker;
   
-        const stream =
+        stream =
           await navigator.mediaDevices.getUserMedia(
             {
               video: {
@@ -258,6 +249,17 @@ export async function setup({videoRef,faceLandmarkerRef,streamRef,setError,setEx
               audio: false
             }
           );
+
+        if (setupToken.cancelled) {
+          stream.getTracks().forEach((track) => track.stop());
+
+          if (faceLandmarkerRef.current === faceLandmarker) {
+            faceLandmarker.close();
+            faceLandmarkerRef.current = null;
+          }
+
+          return;
+        }
   
         console.log(
           "Camera access granted"
@@ -274,6 +276,10 @@ export async function setup({videoRef,faceLandmarkerRef,streamRef,setError,setEx
   
         video.onloadedmetadata =
           () => {
+            if (setupToken.cancelled) {
+              return;
+            }
+
             console.log(
               "Camera is ready"
             );
@@ -288,6 +294,26 @@ export async function setup({videoRef,faceLandmarkerRef,streamRef,setError,setEx
           };
   
       } catch (err) {
+        if (stream) {
+          stream.getTracks().forEach((track) => track.stop());
+        }
+
+        if (
+          faceLandmarker &&
+          (!setupToken.cancelled ||
+            faceLandmarkerRef.current === faceLandmarker)
+        ) {
+          faceLandmarker.close();
+        }
+
+        if (faceLandmarkerRef.current === faceLandmarker) {
+          faceLandmarkerRef.current = null;
+        }
+
+        if (setupToken.cancelled) {
+          return;
+        }
+
         console.error(
           "Setup error:",
           err

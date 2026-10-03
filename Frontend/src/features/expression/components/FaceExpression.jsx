@@ -10,6 +10,7 @@ const FaceExpression = () => {
     const videoRef = useRef(null);
     const faceLandmarkerRef = useRef(null);
     const streamRef = useRef(null);
+    const setupTokenRef = useRef(null);
 
     const [expression, setExpression] =
         useState("Camera loading...");
@@ -26,35 +27,57 @@ const FaceExpression = () => {
     const [isLoggingOut, setIsLoggingOut] =
         useState(false);
 
+    const stopCamera = (resetState = false) => {
+        if (setupTokenRef.current) {
+            setupTokenRef.current.cancelled = true;
+            setupTokenRef.current = null;
+        }
+
+        if (streamRef.current) {
+            streamRef.current
+                .getTracks()
+                .forEach((track) => track.stop());
+
+            streamRef.current = null;
+        }
+
+        if (videoRef.current) {
+            videoRef.current.srcObject = null;
+            videoRef.current.onloadedmetadata = null;
+        }
+
+        if (faceLandmarkerRef.current) {
+            faceLandmarkerRef.current.close();
+            faceLandmarkerRef.current = null;
+        }
+
+        if (resetState) {
+            setCameraReady(false);
+            setExpression("Camera stopped.");
+            setError("");
+        }
+    };
+
+    const startCamera = () => {
+        const setupToken = { cancelled: false };
+        setupTokenRef.current = setupToken;
+
+        setup({
+            videoRef,
+            faceLandmarkerRef,
+            streamRef,
+            setupToken,
+            setError,
+            setExpression,
+            setCameraReady,
+        });
+    };
+
     useEffect(() => {
-        setup({ videoRef, faceLandmarkerRef, streamRef, setError, setExpression, setCameraReady });
+        startCamera();
 
         return () => {
-            if (streamRef.current) {
-                streamRef.current
-                    .getTracks()
-                    .forEach((track) => {
-                        track.stop();
-                    });
-
-                streamRef.current =
-                    null;
-            }
-
-            if (videoRef.current) {
-                videoRef.current.srcObject =
-                    null;
-
-                videoRef.current.onloadedmetadata =
-                    null;
-            }
-
-            if (faceLandmarkerRef.current) {
-                faceLandmarkerRef.current.close();
-
-                faceLandmarkerRef.current =
-                    null;
-            }
+            stopCamera();
         };
     }, []);
 
@@ -62,6 +85,7 @@ const FaceExpression = () => {
         if (isLoggingOut) return;
 
         setIsLoggingOut(true);
+        stopCamera(true);
 
         try {
             await handleLogout();
@@ -72,6 +96,7 @@ const FaceExpression = () => {
         } catch (error) {
             console.error("Logout failed:", error);
             setIsLoggingOut(false);
+            startCamera();
         }
     };
 

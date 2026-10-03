@@ -57,12 +57,22 @@ async function loginUser(req, res) {
     const { username, email, password } = req.body;
 
 
-    const isAlreadyregistered = await userModel.findOne({
-        $or: [
-            { email: email },
-            { username: username }
-        ]
-    }).select("+password");
+    const identifiers = [];
+
+    if (email) {
+        identifiers.push({ email });
+    }
+
+    if (username) {
+        identifiers.push({ username });
+    }
+
+    const userQuery = identifiers.length > 1
+        ? { $or: identifiers }
+        : identifiers[0] || { _id: null };
+
+    const isAlreadyregistered = await userModel.findOne(userQuery)
+        .select("+password");
 
     if (!isAlreadyregistered) {
 
@@ -106,7 +116,6 @@ async function loginUser(req, res) {
 async function getme(req, res) {
 
     const { id } = req.user;
-    console.log(req.user.id);
     const user = await userModel.findById(id);
 
     res.status(200).json({

@@ -153,21 +153,6 @@ body {
           input {
             padding-right: 70px;
           }
-          .password-toggle {
-            position: absolute;
-            right: 12px;
-            top: 50%;
-            transform: translateY(-50%);
-            border: none;
-            background: transparent;
-            color: #818cf8;
-            font-size: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            &:hover {
-              color: #a5b4fc;
-            }
-          }
         }
       }
       .form-error {
@@ -177,28 +162,6 @@ body {
         background: rgba(239, 68, 68, 0.08);
         color: #fca5a5;
         font-size: 12px;
-      }
-      .register-button {
-        width: 100%;
-        height: 48px;
-        margin-top: 3px;
-        border: none;
-        border-radius: 12px;
-        background: linear-gradient(135deg, #6366f1, #8b5cf6);
-        color: #ffffff;
-        font-size: 15px;
-        font-weight: 700;
-        cursor: pointer;
-        transition:
-          transform 0.2s ease,
-          box-shadow 0.2s ease;
-        &:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 12px 30px rgba(99, 102, 241, 0.3);
-        }
-        &:active {
-          transform: translateY(0);
-        }
       }
     }
     .login-link {
@@ -278,9 +241,6 @@ body {
             height: 44px;
           }
         }
-        .register-button {
-          height: 46px;
-        }
       }
       .login-link {
         margin-top: 15px;
@@ -333,10 +293,6 @@ body {
           small {
             font-size: 9px;
           }
-        }
-        .register-button {
-          height: 41px;
-          font-size: 13px;
         }
       }
       .login-link {

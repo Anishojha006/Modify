@@ -32,6 +32,11 @@
   // Heading
   // =====================================
 
+
+  .moodify-logo{
+    font-size:3.2rem;
+    padding-bottom: 2rem;
+  }
   h1 {
     margin: 0 0 32px;
 
@@ -68,18 +73,6 @@
 
     backdrop-filter: blur(10px);
 
-    button[type="submit"] {
-      background: #6366f1;
-      color: white;
-      padding: 12px 20px;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-    }
-
-    button[type="submit"]:active {
-      transform: scale(0.95);
-    }
     // =================================
     // Email & Password field containers
     // =================================
@@ -168,47 +161,6 @@
         padding-right: 80px;
       }
 
-      // =============================
-      // Show / Hide button
-      // =============================
-
-      button {
-        position: absolute;
-
-        right: 10px;
-        bottom: 10px;
-
-        height: 38px;
-
-        padding: 0 12px;
-
-        border: none;
-        border-radius: 8px;
-
-        background: transparent;
-
-        color: #8b7cff;
-
-        font-size: 14px;
-        font-weight: 600;
-
-        cursor: pointer;
-
-        transition:
-          background 0.2s ease,
-          color 0.2s ease,
-          transform 0.15s ease;
-
-        &:hover {
-          background: rgba(118, 87, 255, 0.1);
-
-          color: #a293ff;
-        }
-
-        &:active {
-          transform: scale(0.95);
-        }
-      }
     }
   }
 

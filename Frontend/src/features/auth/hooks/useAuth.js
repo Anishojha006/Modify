@@ -43,15 +43,6 @@ export const useProfile = () => {
 
             return response;
 
-        } catch (error) {
-
-            console.error(
-                "Login failed:",
-                error
-            );
-
-            throw error;
-
         } finally {
 
             setLoading(false);
@@ -79,15 +70,6 @@ export const useProfile = () => {
 
             return response;
 
-        } catch (error) {
-
-            console.error(
-                "Registration failed:",
-                error
-            );
-
-            throw error;
-
         } finally {
 
             setLoading(false);
@@ -102,9 +84,6 @@ export const useProfile = () => {
             const response = await logout();
             setUser(null);
             return response;
-        } catch (err) {
-            console.log("server error", err);
-            throw err;
         } finally {
             setLoading(false);
         }
