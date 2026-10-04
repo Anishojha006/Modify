@@ -19,6 +19,8 @@
     "express": "^5.2.1",
     "ioredis": "^6.0.0",
     "jsonwebtoken": "^9.0.3",
-    "mongoose": "^9.9.5"
+    "mongoose": "^9.9.5",
+    "multer": "^2.4.0",
+    "node-id3": "^0.2.9"
   }
 }
