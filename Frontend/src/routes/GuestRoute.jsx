@@ -10,7 +10,7 @@ const GuestRoute = ({ children }) => {
     }
 
     if (user) {
-        return <Navigate to="/dashboad" replace />;
+        return <Navigate to="/dashboard" replace />;
     }
 
     return children;

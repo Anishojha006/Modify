@@ -39,7 +39,7 @@ const Login = () => {
                 password: key,
             });
 
-            navigate("/dashboad");
+            navigate("/dashboard");
         } catch (err) {
             setError(
                 err.message ||

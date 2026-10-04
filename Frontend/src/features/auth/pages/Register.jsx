@@ -171,7 +171,7 @@ const Register = () => {
 
          
 
-            navigate("/dashboad", {
+            navigate("/dashboard", {
                 replace: true,
             });
 

@@ -144,23 +144,25 @@ const FaceExpression = () => {
                 {!cameraReady && <div className="camera-overlay">Preparing camera...</div>}
             </section>
 
-            <section className="expression-result" aria-live="polite">
-                <p className="result-label">Detected expression</p>
-                <h2>{expression}</h2>
-            </section>
+            <div className="expression-controls">
+                <section className="expression-result" aria-live="polite">
+                    <p className="result-label">Detected expression</p>
+                    <h2>{expression}</h2>
+                </section>
 
-            <button
-                onClick={() => { detectExpression({ videoRef, faceLandmarkerRef, setLoading: setDetecting, setError, setExpression }) }}
-                disabled={
-                    !cameraReady || detecting
-                }
-                className="detect-button"
-            >
-                {detecting
-                    ? "Detecting..."
-                    : "Detect Expression"}
-            </button>
-            <p className="privacy-note">Your camera feed stays in this browser.</p>
+                <button
+                    onClick={() => { detectExpression({ videoRef, faceLandmarkerRef, setLoading: setDetecting, setError, setExpression }) }}
+                    disabled={
+                        !cameraReady || detecting
+                    }
+                    className="detect-button"
+                >
+                    {detecting
+                        ? "Detecting..."
+                        : "Detect Expression"}
+                </button>
+                <p className="privacy-note">Your camera feed stays in this browser.</p>
+            </div>
         </main></>
     );
 };

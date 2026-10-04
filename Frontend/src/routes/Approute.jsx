@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import Register from "../features/auth/pages/Register.jsx"
 import FaceExpression from "../features/expression/components/FaceExpression.jsx";
 import Login from "../features/auth/pages/Login.jsx"
@@ -39,12 +39,17 @@ const AppRoutes = () => {
             />
 
             <Route
-                path="/dashboad"
+                path="/dashboard"
                 element={
                     <ProtectedRoute>
                         <FaceExpression />
                     </ProtectedRoute>
                 }
+            />
+
+            <Route
+                path="/dashboad"
+                element={<Navigate to="/dashboard" replace />}
             />
 
             <Route path="*" element={<NotFound />} />
