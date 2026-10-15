@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "postbuild": "node -e \"require('node:fs').cpSync('dist', '../Backend/src/public', { recursive: true })\"",
     "lint": "oxlint",
     "preview": "vite preview"
   },
