@@ -26,8 +26,6 @@ async function uploadFile({ buffer, filename, folder = "" }) {
 
     const client = new ImageKit({
         privateKey: process.env.IMAGEKIT_PRIVATE_KEY,
-        publicKey: process.env.IMAGEKIT_PUBLIC_KEY,
-        urlEndpoint: process.env.IMAGEKIT_URL_ENDPOINT,
     });
 
     return client.files.upload({
