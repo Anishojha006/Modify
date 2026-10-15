@@ -1,0 +1,224 @@
+﻿.player-shell {
+  width: min(100%, 420px);
+  display: flex;
+  justify-content: center;
+}
+
+.player-card {
+  width: min(100%, 420px);
+  padding: 22px 20px 18px;
+  border: 1px solid var(--border);
+  border-radius: 22px;
+  background: linear-gradient(180deg, rgba(18, 26, 37, 0.96), rgba(12, 18, 26, 0.98));
+  box-shadow: 0 24px 60px rgba(10, 16, 20, 0.28);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.player-art-wrap {
+  width: min(100%, 340px);
+  aspect-ratio: 1;
+  align-self: center;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 18px;
+  background: radial-gradient(circle, #243142 0%, #101923 68%, #080d13 100%);
+}
+
+.player-disc {
+  width: 88%;
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background:
+    repeating-radial-gradient(circle, transparent 0 5px, rgba(255, 255, 255, 0.1) 6px, transparent 7px 10px),
+    radial-gradient(circle, #242b35 0 12%, #090c10 13% 18%, #303843 19% 20%, #10151b 21% 100%);
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.55), inset 0 0 22px rgba(255, 255, 255, 0.1);
+}
+
+.player-disc.is-playing {
+  animation: player-disc-spin 3s linear infinite;
+}
+
+.player-disc-hole {
+  grid-area: 1 / 1;
+  z-index: 2;
+  width: 8px;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: #d6dde5;
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.62);
+  pointer-events: none;
+}
+
+@keyframes player-disc-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.player-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.player-kicker {
+  margin: 0;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.player-info h3 {
+  margin: 0;
+  font-size: clamp(1.5rem, 2vw, 2.2rem);
+  line-height: 1.1;
+  color: var(--text-h);
+}
+
+.player-mood-pill {
+  display: inline-flex;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(101, 230, 189, 0.12);
+  border: 1px solid rgba(101, 230, 189, 0.26);
+  color: var(--accent);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: capitalize;
+}
+
+.player-progress {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.player-progress input,
+.player-volume input {
+  width: 100%;
+  accent-color: var(--accent);
+}
+
+.player-times {
+  display: flex;
+  justify-content: space-between;
+  color: #9aa8ba;
+  font-size: 0.76rem;
+}
+
+.player-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+}
+
+.player-control {
+  width: 44px;
+  height: 44px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.02);
+  color: var(--text-h);
+  font-size: 1.05rem;
+  cursor: pointer;
+  transition: transform 180ms ease, border-color 180ms ease, background 180ms ease;
+}
+
+.player-control:hover {
+  transform: translateY(-1px);
+  border-color: rgba(101, 230, 189, 0.4);
+  background: rgba(101, 230, 189, 0.08);
+}
+
+.player-control-primary {
+  width: 64px;
+  height: 64px;
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #04130d;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.player-volume {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #b8c5d6;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.player-volume span {
+  width: 62px;
+  flex: 0 0 auto;
+}
+
+@media (min-width: 700px) {
+  .player-shell {
+    grid-area: player;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .player-card {
+    width: min(100%, 520px);
+  }
+}
+
+@media (min-width: 1024px) {
+  .player-shell {
+    justify-content: stretch;
+  }
+
+  .player-card {
+    width: 100%;
+  }
+}
+
+@media (max-width: 699px) {
+  .player-shell,
+  .player-card {
+    width: 100%;
+  }
+
+  .player-card {
+    padding: 18px 16px 16px;
+    gap: 15px;
+    border-radius: 18px;
+  }
+
+  .player-art-wrap {
+    width: min(100%, 340px);
+    align-self: center;
+  }
+
+  .player-controls {
+    gap: 12px;
+  }
+
+  .player-control-primary {
+    width: 58px;
+    height: 58px;
+  }
+
+  .player-volume {
+    gap: 10px;
+  }
+
+  .player-volume span {
+    width: 56px;
+  }
+}

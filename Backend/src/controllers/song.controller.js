@@ -2,35 +2,72 @@ const songModel = require("../models/song.model");
 const id3 = require("node-id3");
 const storageServices = require("../service/storage.service.js");
 
+const VALID_MOODS = new Set(["sad", "happy", "surprised", "angry", "neutral"]);
+
+function normalizeMood(mood) {
+    if (typeof mood !== "string") return "";
+    return mood.trim().toLowerCase();
+}
+
+function getSafeTitle(file, tags) {
+    const rawTitle = tags?.title || file?.originalname || "untitled-song";
+    const title = rawTitle
+        .replace(/\.[^/.]+$/, "")
+        .replace(/[<>:"/\\|?*]+/g, "")
+        .trim();
+
+    return title || "untitled-song";
+}
+
+function getPosterBuffer(tags) {
+    const image = tags?.image;
+    if (Buffer.isBuffer(image)) return image;
+    if (image && Buffer.isBuffer(image.imageBuffer)) return image.imageBuffer;
+    if (image && Buffer.isBuffer(image.data)) return image.data;
+    return storageServices.DEFAULT_POSTER;
+}
+
 async function uploadSong(req, res) {
     try {
-        const songBuffer = req.file.buffer;
+        const uploadedFile = req.file || (Array.isArray(req.files) ? req.files[0] : null);
 
-        const tags = id3.read(songBuffer);
+        if (!uploadedFile) {
+            return res.status(400).json({ message: "No song file uploaded." });
+        }
 
-        const { mood } = req.body;
+        const songBuffer = uploadedFile.buffer;
+        const tags = id3.read(songBuffer) || {};
+        const explicitMood = normalizeMood(req.body.mood);
+        const fieldMood = normalizeMood(uploadedFile.fieldname);
+        const mood = explicitMood || fieldMood;
 
-        // Upload song and poster simultaneously
+        if (!VALID_MOODS.has(mood)) {
+            return res.status(400).json({
+                message: "Mood is required and must be one of sad, happy, surprised, angry, neutral.",
+            });
+        }
+
+        const title = getSafeTitle(uploadedFile, tags);
+        const posterBuffer = getPosterBuffer(tags);
+
         const [storageFile, posterFile] = await Promise.all([
             storageServices.uploadFile({
                 buffer: songBuffer,
-                filename: tags.title + ".mp3",
+                filename: `${title}.mp3`,
                 folder: "/cohort-2/moodify",
             }),
-
             storageServices.uploadFile({
-                buffer: tags.image,
-                filename: tags.title + ".jpeg",
+                buffer: posterBuffer,
+                filename: `${title}.jpeg`,
                 folder: "/cohort-2/moodify/posters",
             }),
         ]);
 
-        // Create database record after both uploads are completed
         const song = await songModel.create({
-            title: tags.title,
+            title,
             url: storageFile.url,
             posterUrl: posterFile.url,
-            mood: mood,
+            mood,
         });
 
         res.status(201).json({
@@ -48,27 +85,36 @@ async function uploadSong(req, res) {
 }
 
 async function getSong(req, res) {
-    const { mood } = req.query;
+    try {
+        const mood = normalizeMood(req.query.mood);
 
-    const song = await songModel.aggregate([
-        {
-            $match: {
-                mood: mood
-            }
-        },
-        {
-            $sample: {
-                size: 1
-            }
-        }
-    ]);
+        const song = await songModel.aggregate([
+            {
+                $match: {
+                    mood,
+                },
+            },
+            {
+                $sample: {
+                    size: 1,
+                },
+            },
+        ]);
 
-    console.log(randomSong);
-    res.status(200).json({
-        message: "song fetched successfully",
-        song
-    })
+        res.status(200).json({
+            message: "song fetched successfully",
+            song,
+        });
+    } catch (error) {
+        console.error("Error fetching song:", error);
+        res.status(500).json({
+            message: "Internal server error",
+            error: error.message,
+        });
+    }
 }
+
 module.exports = {
-    uploadSong, getSong
+    uploadSong,
+    getSong,
 };

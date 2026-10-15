@@ -3,10 +3,14 @@ import { useNavigate } from "react-router-dom";
 import { detectExpression, setup } from "../utills/utils";
 import { useAuth } from "../../auth/hooks/useAuth.js"
 import Loader from "../../auth/componenets/Loader.jsx";
+import Player from "../../Home/components/Player.jsx";
+import { useSong } from "../../Home/hooks/useSongs.js";
+import "../style/FaceExpression.scss";
 
 const FaceExpression = () => {
     const navigate = useNavigate();
     const { loading: authLoading, setUser, handleLogout } = useAuth();
+    const { handleGetSongs, preparePlayback, restorePlaybackAudio } = useSong();
     const videoRef = useRef(null);
     const faceLandmarkerRef = useRef(null);
     const streamRef = useRef(null);
@@ -26,6 +30,40 @@ const FaceExpression = () => {
 
     const [isLoggingOut, setIsLoggingOut] =
         useState(false);
+ 
+    const handleDetectExpression = async () => {
+        preparePlayback();
+
+        let detectedExpression;
+        try {
+            detectedExpression = await detectExpression({
+                videoRef,
+                faceLandmarkerRef,
+                setLoading: setDetecting,
+                setError,
+                setExpression,
+            });
+        } catch (error) {
+            console.error("Unable to detect expression:", error);
+            setError("Unable to detect an expression. Please try again.");
+            restorePlaybackAudio();
+            return;
+        }
+
+        console.log(detectedExpression);
+        if (!detectedExpression || detectedExpression === "no-face") {
+            restorePlaybackAudio();
+            return;
+        }
+
+        try {
+            await handleGetSongs({ mood: detectedExpression });
+        } catch (error) {
+            console.error("Unable to load a song for the detected expression:", error);
+            setError("Expression detected, but a matching song could not be loaded.");
+            restorePlaybackAudio();
+        }
+    };
 
     const stopCamera = (resetState = false) => {
         if (setupTokenRef.current) {
@@ -151,10 +189,8 @@ const FaceExpression = () => {
                 </section>
 
                 <button
-                    onClick={() => { detectExpression({ videoRef, faceLandmarkerRef, setLoading: setDetecting, setError, setExpression }) }}
-                    disabled={
-                        !cameraReady || detecting
-                    }
+                    onClick={handleDetectExpression}
+                    disabled={!cameraReady || detecting}
                     className="detect-button"
                 >
                     {detecting
@@ -163,6 +199,8 @@ const FaceExpression = () => {
                 </button>
                 <p className="privacy-note">Your camera feed stays in this browser.</p>
             </div>
+
+            <Player />
         </main></>
     );
 };
