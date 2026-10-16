@@ -19,14 +19,6 @@ async function startServer() {
         (name) => !process.env[name]
     );
 
-    const hasConfiguredCorsOrigin = (process.env.CORS_ORIGIN || "")
-        .split(",")
-        .some((origin) => origin.trim());
-
-    if (process.env.NODE_ENV === "production" && !hasConfiguredCorsOrigin) {
-        missingVariables.push("CORS_ORIGIN");
-    }
-
     if (missingVariables.length > 0) {
         throw new Error(
             `Missing required environment variables: ${missingVariables.join(", ")}`
