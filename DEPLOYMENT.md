@@ -12,11 +12,12 @@ application does not include production instances of these dependencies.
 - Install the API dependencies with `npm ci` from `Backend/`, then start it
   with `npm start`.
 - Use Node.js 20.19 or newer.
-- Configure the variables from [`Backend/.env.example`](Backend/.env.example):
-  `MONGO_URI`, `SECRET_KEY`, `REDIS_HOST`, `REDIS_PORT`, `REDIS_PASSWORD`,
-  `IMAGEKIT_PRIVATE_KEY`, `IMAGEKIT_PUBLIC_KEY`, and `IMAGEKIT_URL_ENDPOINT`.
-- Set `NODE_ENV=production`. If the frontend and API share an origin,
-  `CORS_ORIGIN` is not needed; otherwise set it to the exact frontend origin
+- Configure `MONGO_URI`, `SECRET_KEY`, `REDIS_HOST`, `REDIS_PORT`,
+  `REDIS_PASSWORD`, `IMAGEKIT_PRIVATE_KEY`, `IMAGEKIT_PUBLIC_KEY`,
+  `IMAGEKIT_URL_ENDPOINT`, and `CORS_ORIGIN` as environment variables for the
+  backend service in your hosting provider. A local `Backend/.env` file is not
+  automatically uploaded or loaded by the host.
+- Set `NODE_ENV=production` and set `CORS_ORIGIN` to the exact frontend origin
   (scheme and hostname, with no trailing slash). Multiple origins can be
   comma-separated. The hosting platform should provide `PORT`.
 - Configure the platform health check to request `/health`.
