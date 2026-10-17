@@ -4,10 +4,10 @@ export const SongContext = createContext();
 
 export const SongContextProvider = ({ children }) => {
     const [song, setSong] = useState({
-        "url": "https://ik.imagekit.io/hnoglysw00/cohort-2/moodify/songs/Lady_Singham_gs01DFz-1.mp3",
-        "posterUrl": "https://ik.imagekit.io/hnoglysw00/cohort-2/moodify/posters/Lady_Singham_WW8DGJkie",
-        "title": "Lady Singham",
-        "mood": "happy"
+        url: "",
+        posterUrl: "",
+        title: "",
+        mood: "",
     });
 
     const [loading, setLoading] = useState(false);

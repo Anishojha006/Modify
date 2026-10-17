@@ -3,8 +3,8 @@ import { useSong } from "../hooks/useSongs.js";
 import "../style/player.scss";
 
 const FALLBACK_SONG = {
-    title: "Untitled Track",
-    mood: "Chill",
+    title: "---",
+    mood: "---",
     url: "",
 };
 
