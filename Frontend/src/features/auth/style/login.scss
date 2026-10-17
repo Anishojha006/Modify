@@ -1,5 +1,5 @@
 .login-page {
-  min-height: 100vh;
+  min-height: 100svh;
   width: 100%;
 
   display: flex;
@@ -8,7 +8,7 @@
   justify-content: center;
 
   box-sizing: border-box;
-  padding: 40px 20px;
+  padding: 48px 24px;
 
   background:
     radial-gradient(
@@ -161,6 +161,28 @@
         padding-right: 80px;
       }
 
+    }
+  }
+
+  @media (min-width: 601px) {
+    padding: clamp(20px, 5vh, 48px) 24px;
+
+    .moodify-logo {
+      font-size: clamp(2.4rem, 6vh, 3.2rem);
+      padding-bottom: clamp(1rem, 3vh, 2rem);
+    }
+
+    h1 {
+      font-size: clamp(30px, 5vh, 38px);
+      margin-bottom: clamp(18px, 4vh, 32px);
+    }
+
+    form {
+      padding: clamp(24px, 5vh, 42px) clamp(24px, 5vw, 48px);
+
+      > div {
+        margin-bottom: clamp(16px, 3.5vh, 28px);
+      }
     }
   }
 

@@ -1,4 +1,4 @@
-﻿.player-shell {
+.player-shell {
   width: min(100%, 420px);
   display: flex;
   justify-content: center;
@@ -185,6 +185,56 @@
 
   .player-card {
     width: 100%;
+    padding: clamp(16px, 2vh, 24px);
+    gap: clamp(10px, 1.7vh, 18px);
+  }
+
+  .player-art-wrap {
+    width: min(100%, clamp(190px, 28vh, 320px));
+  }
+
+  .player-control {
+    width: 40px;
+    height: 40px;
+  }
+
+  .player-control-primary {
+    width: 54px;
+    height: 54px;
+  }
+}
+
+@media (min-width: 1024px) and (max-height: 900px) {
+  .player-card {
+    gap: clamp(8px, 1.2vh, 12px);
+    padding: 14px;
+  }
+
+  .player-art-wrap {
+    width: min(100%, clamp(110px, 18vh, 160px));
+    border-radius: 14px;
+  }
+
+  .player-info {
+    gap: 5px;
+  }
+
+  .player-info h3 {
+    font-size: clamp(1.2rem, 2.6vh, 1.6rem);
+  }
+
+  .player-controls {
+    gap: 10px;
+  }
+
+  .player-control {
+    width: 34px;
+    height: 34px;
+  }
+
+  .player-control-primary {
+    width: 46px;
+    height: 46px;
   }
 }
 
