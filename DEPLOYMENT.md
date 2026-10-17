@@ -25,5 +25,6 @@ application does not include production instances of these dependencies.
 
 Production builds default `VITE_API_URL` to `/api/auth`, so the same-origin
 API works without extra frontend configuration. Override it at build time only
-if the API is hosted at a different origin. Keep HTTPS enabled in production
-for secure authentication cookies.
+if the API is hosted at a different origin. Localhost API URLs are ignored by
+production builds and resolve to the same-origin API instead. Keep HTTPS
+enabled in production for secure authentication cookies.
