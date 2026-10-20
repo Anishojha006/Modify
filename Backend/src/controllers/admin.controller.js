@@ -1,5 +1,7 @@
 const bcrypt = require("bcryptjs");
-const adminModel = require("adminModel");
+const adminModel = require("../models/admin.model.js");
+const jwt = require("jsonwebtoken");
+const redis = require("../config/cache.js");
 
 async function adminLogin(req, res) {
     try {
@@ -37,6 +39,24 @@ async function adminLogin(req, res) {
                 message: "invalid credentials"
             })
         }
+
+        const token = jwt.sign({
+            id: admin._id,
+            username: admin.username,
+            role:"admin"
+
+        }, process.env.SECRET_KEY, { expiresIn: "3d" })
+
+        res.cookie("token", token,
+            {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === "production",
+                sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
+                maxAge: 3 * 24 * 60 * 60 * 1000
+            }
+        )
+
+
         res.status(200).json({
             message: "Credentials verified successfully.",
             admin: {
@@ -55,3 +75,5 @@ async function adminLogin(req, res) {
 
     }
 }
+
+module.exports = {adminLogin}

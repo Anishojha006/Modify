@@ -91,7 +91,8 @@ async function loginUser(req, res) {
 
     const token = jwt.sign({
         id: isAlreadyregistered._id,
-        email: isAlreadyregistered.email
+        email: isAlreadyregistered.email,
+        role: "user"
 
     }, process.env.SECRET_KEY, { expiresIn: "3d" })
 
