@@ -1,0 +1,126 @@
+$admin-bg: #0b1018;
+$admin-surface: #121a25;
+$admin-border: #26364a;
+$admin-text: #f4f7fb;
+$admin-muted: #a6adbb;
+$admin-accent: #65e6bd;
+
+.admin-login {
+  display: grid;
+  min-height: 100vh;
+  place-items: center;
+  padding: 24px;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(101, 230, 189, 0.1), transparent 42%),
+    $admin-bg;
+  color: $admin-text;
+  font-family: system-ui, "Segoe UI", sans-serif;
+
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  &__form {
+    display: flex;
+    width: min(100%, 400px);
+    flex-direction: column;
+    gap: 20px;
+    padding: clamp(28px, 6vw, 40px);
+    border: 1px solid $admin-border;
+    border-radius: 16px;
+    background: $admin-surface;
+    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.32);
+  }
+
+  &__title {
+    margin: 0 0 8px;
+    color: $admin-text;
+    font-size: 27px;
+    font-weight: 700;
+    letter-spacing: -0.8px;
+    text-align: center;
+  }
+
+  &__field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    label {
+      color: #d5dce7;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    input {
+      width: 100%;
+      min-height: 48px;
+      padding: 0 14px;
+      border: 1px solid $admin-border;
+      border-radius: 8px;
+      outline: none;
+      background: $admin-bg;
+      color: $admin-text;
+      font: inherit;
+      font-size: 14px;
+      transition: border-color 160ms ease, box-shadow 160ms ease;
+
+      &::placeholder {
+        color: $admin-muted;
+      }
+
+      &:focus {
+        border-color: $admin-accent;
+        box-shadow: 0 0 0 3px rgba(101, 230, 189, 0.13);
+      }
+    }
+  }
+
+  &__submit {
+    min-height: 48px;
+    margin-top: 4px;
+    border: 0;
+    border-radius: 8px;
+    background: $admin-accent;
+    color: #092119;
+    font: inherit;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 160ms ease, transform 160ms ease;
+
+    &:hover {
+      transform: translateY(-1px);
+      background: #7cebc8;
+    }
+
+    &:active {
+      transform: translateY(0);
+    }
+
+    &:focus-visible {
+      outline: 2px solid $admin-accent;
+      outline-offset: 3px;
+    }
+  }
+}
+
+@media (max-width: 420px) {
+  .admin-login {
+    padding: 18px;
+
+    &__form {
+      gap: 17px;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .admin-login *,
+  .admin-login *::before,
+  .admin-login *::after {
+    transition-duration: 0.01ms !important;
+  }
+}

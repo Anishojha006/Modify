@@ -5,6 +5,8 @@ import Login from "../features/auth/pages/Login.jsx"
 import ProtectedRoute from "./ProtectedRoute.jsx";
 import GuestRoute from "./GuestRoute.jsx";
 import NotFound from "../features/expression/pages/NotFound.jsx";
+import Adminlogin from "../features/admin/pages/Adminlogin.jsx";
+import Songupload from "../features/admin/pages/Songupload.jsx";
 
 const AppRoutes = () => {
     return (
@@ -51,7 +53,15 @@ const AppRoutes = () => {
                 path="/dashboad"
                 element={<Navigate to="/dashboard" replace />}
             />
-
+            
+            <Route
+              path="/admin"
+              element={<Adminlogin/>}
+            />
+            <Route
+              path="/admin/songs"
+              element={<Songupload />}
+            />
             <Route path="*" element={<NotFound />} />
 
         </Routes>

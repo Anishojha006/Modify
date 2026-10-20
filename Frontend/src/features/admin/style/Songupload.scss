@@ -1,0 +1,545 @@
+$library-bg: #0b1018;
+$library-surface: #121a25;
+$library-border: #26364a;
+$library-text: #f4f7fb;
+$library-muted: #a6adbb;
+$library-accent: #65e6bd;
+
+.song-admin {
+  min-height: 100vh;
+  background: $library-bg;
+  color: $library-text;
+  font-family: system-ui, "Segoe UI", sans-serif;
+  text-align: left;
+
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  button,
+  input,
+  select {
+    font: inherit;
+  }
+
+  &__header {
+    display: flex;
+    min-height: 72px;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 12px max(24px, calc((100vw - 1120px) / 2));
+    border-bottom: 1px solid $library-border;
+    background: rgba(18, 26, 37, 0.82);
+  }
+
+  &__brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    color: $library-text;
+    font-size: 19px;
+    font-weight: 750;
+    letter-spacing: -0.5px;
+    text-decoration: none;
+  }
+
+  &__brand-icon {
+    display: grid;
+    width: 34px;
+    height: 34px;
+    place-items: center;
+    border-radius: 10px;
+    background: $library-accent;
+    color: #092119;
+    font-size: 21px;
+  }
+
+  &__brand-label {
+    margin-left: 3px;
+    padding: 4px 7px;
+    border: 1px solid rgba(101, 230, 189, 0.25);
+    border-radius: 5px;
+    color: $library-accent;
+    font-size: 9px;
+    letter-spacing: 1px;
+  }
+
+  &__status {
+    color: $library-muted;
+    font-size: 12px;
+  }
+
+  &__main {
+    width: min(100% - 48px, 960px);
+    margin: 0 auto;
+    padding: 48px 0 64px;
+  }
+
+  &__page-heading {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 24px;
+    margin-bottom: 24px;
+
+    h1 {
+      margin: 7px 0 8px;
+      color: $library-text;
+      font-size: clamp(28px, 4vw, 36px);
+      font-weight: 740;
+      letter-spacing: -1.2px;
+      line-height: 1.15;
+    }
+  }
+
+  &__eyebrow {
+    margin: 0;
+    color: $library-accent;
+    font-size: 10px;
+    font-weight: 750;
+    letter-spacing: 1.5px;
+  }
+
+  &__subtitle {
+    margin: 0;
+    color: $library-muted;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  &__count {
+    display: flex;
+    flex: 0 0 auto;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 2px;
+    padding: 11px 14px;
+    border: 1px solid $library-border;
+    border-radius: 10px;
+    background: $library-surface;
+
+    strong {
+      color: $library-text;
+      font-size: 20px;
+      line-height: 1;
+    }
+
+    span {
+      color: $library-muted;
+      font-size: 10px;
+    }
+  }
+
+  &__notice {
+    margin-bottom: 18px;
+    padding: 11px 14px;
+    border: 1px solid rgba(101, 230, 189, 0.18);
+    border-radius: 8px;
+    background: rgba(101, 230, 189, 0.06);
+    color: #b1c7c0;
+    font-size: 12px;
+    line-height: 1.5;
+  }
+
+  &__panel {
+    margin-top: 18px;
+    padding: clamp(18px, 3vw, 26px);
+    border: 1px solid $library-border;
+    border-radius: 14px;
+    background: $library-surface;
+  }
+
+  &__section-heading {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 22px;
+
+    h2 {
+      margin: 0;
+      color: $library-text;
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: -0.2px;
+    }
+
+    p {
+      margin: 4px 0 0;
+      color: $library-muted;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+  }
+
+  &__section-icon {
+    display: grid;
+    width: 38px;
+    height: 38px;
+    flex: 0 0 auto;
+    place-items: center;
+    border: 1px solid rgba(101, 230, 189, 0.2);
+    border-radius: 10px;
+    background: rgba(101, 230, 189, 0.08);
+    color: $library-accent;
+    font-size: 21px;
+  }
+
+  &__form {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 17px;
+  }
+
+  &__form-fields {
+    display: grid;
+    width: 100%;
+    grid-template-columns: 1.2fr 1fr 0.8fr;
+    gap: 14px;
+  }
+
+  &__field {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: 7px;
+
+    > span {
+      color: #d5dce7;
+      font-size: 11px;
+      font-weight: 650;
+    }
+
+    input,
+    select {
+      width: 100%;
+      min-width: 0;
+      height: 42px;
+      padding: 0 11px;
+      border: 1px solid $library-border;
+      border-radius: 7px;
+      outline: 0;
+      background: $library-bg;
+      color: $library-text;
+      font-size: 12px;
+
+      &::placeholder {
+        color: #788598;
+      }
+
+      &:focus {
+        border-color: $library-accent;
+        box-shadow: 0 0 0 3px rgba(101, 230, 189, 0.1);
+      }
+    }
+  }
+
+  &__file {
+    display: flex;
+    width: 100%;
+    min-height: 62px;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 13px;
+    border: 1px dashed #3a4a5a;
+    border-radius: 8px;
+    background: rgba(11, 16, 24, 0.48);
+    cursor: pointer;
+    transition: border-color 160ms ease, background-color 160ms ease;
+
+    &:hover,
+    &:focus-within {
+      border-color: $library-accent;
+      background: rgba(101, 230, 189, 0.035);
+    }
+
+    input {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      clip-path: inset(50%);
+    }
+  }
+
+  &__file-icon {
+    display: grid;
+    width: 36px;
+    height: 36px;
+    flex: 0 0 auto;
+    place-items: center;
+    border-radius: 8px;
+    background: rgba(101, 230, 189, 0.1);
+    color: $library-accent;
+    font-size: 21px;
+  }
+
+  &__file-copy {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: 3px;
+
+    strong {
+      overflow: hidden;
+      color: $library-text;
+      font-size: 12px;
+      font-weight: 600;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    small {
+      color: $library-muted;
+      font-size: 10px;
+    }
+  }
+
+  &__browse {
+    margin-left: auto;
+    padding: 7px 10px;
+    border: 1px solid $library-border;
+    border-radius: 6px;
+    color: #d5dce7;
+    font-size: 10px;
+    white-space: nowrap;
+  }
+
+  &__primary-button {
+    min-height: 40px;
+    padding: 0 15px;
+    border: 0;
+    border-radius: 7px;
+    background: $library-accent;
+    color: #092119;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 160ms ease, transform 160ms ease;
+
+    &:hover {
+      transform: translateY(-1px);
+      background: #7cebc8;
+    }
+
+    &:focus-visible {
+      outline: 2px solid $library-accent;
+      outline-offset: 3px;
+    }
+  }
+
+  &__library-heading {
+    margin-bottom: 16px;
+  }
+
+  &__table-wrap {
+    overflow-x: auto;
+  }
+
+  &__table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+
+    th {
+      padding: 11px 12px;
+      border-bottom: 1px solid $library-border;
+      color: #8997aa;
+      font-size: 10px;
+      font-weight: 650;
+      letter-spacing: 0.7px;
+      text-transform: uppercase;
+    }
+
+    td {
+      padding: 12px;
+      border-bottom: 1px solid rgba(38, 54, 74, 0.65);
+      color: $library-text;
+      font-size: 12px;
+    }
+
+    tr:last-child td {
+      border-bottom: 0;
+    }
+  }
+
+  &__song {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+  }
+
+  &__cover {
+    display: grid;
+    width: 39px;
+    height: 39px;
+    flex: 0 0 auto;
+    place-items: center;
+    border-radius: 7px;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 19px;
+
+    &--0 { background: linear-gradient(145deg, #d79662, #754d74); }
+    &--1 { background: linear-gradient(145deg, #6bb8ad, #435b8c); }
+    &--2 { background: linear-gradient(145deg, #8d78c5, #453d64); }
+    &--3 { background: linear-gradient(145deg, #d36e65, #713f5c); }
+  }
+
+  &__song-details {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: 3px;
+
+    strong {
+      overflow: hidden;
+      font-size: 12px;
+      font-weight: 650;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    small {
+      color: $library-muted;
+      font-size: 10px;
+    }
+  }
+
+  &__mood {
+    display: inline-flex;
+    padding: 4px 8px;
+    border: 1px solid rgba(101, 230, 189, 0.2);
+    border-radius: 20px;
+    background: rgba(101, 230, 189, 0.07);
+    color: #a2e9d4;
+    font-size: 10px;
+    text-transform: capitalize;
+
+    &--sad { border-color: rgba(130, 165, 255, 0.23); background: rgba(130, 165, 255, 0.08); color: #b5c8ff; }
+    &--angry { border-color: rgba(255, 132, 132, 0.23); background: rgba(255, 132, 132, 0.08); color: #ffb0b0; }
+    &--surprised { border-color: rgba(255, 204, 112, 0.23); background: rgba(255, 204, 112, 0.08); color: #ffdc9b; }
+  }
+
+  &__delete {
+    padding: 7px 10px;
+    border: 1px solid rgba(255, 112, 112, 0.22);
+    border-radius: 6px;
+    background: rgba(255, 112, 112, 0.07);
+    color: #ffaaaa;
+    font-size: 10px;
+    cursor: pointer;
+    transition: background-color 150ms ease;
+
+    &:hover {
+      background: rgba(255, 112, 112, 0.16);
+    }
+
+    &:focus-visible {
+      outline: 2px solid #ff9b9b;
+      outline-offset: 2px;
+    }
+  }
+
+  &__empty {
+    margin: 0;
+    padding: 26px 12px 10px;
+    color: $library-muted;
+    font-size: 13px;
+    text-align: center;
+  }
+}
+
+@media (max-width: 700px) {
+  .song-admin {
+    &__header {
+      padding-inline: 20px;
+    }
+
+    &__main {
+      width: min(100% - 36px, 560px);
+      padding-top: 34px;
+    }
+
+    &__form-fields {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    &__field:last-child {
+      grid-column: 1 / -1;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .song-admin {
+    &__header {
+      min-height: 64px;
+      padding-inline: 16px;
+    }
+
+    &__brand {
+      gap: 7px;
+      font-size: 17px;
+    }
+
+    &__brand-icon {
+      width: 31px;
+      height: 31px;
+    }
+
+    &__status {
+      font-size: 11px;
+    }
+
+    &__main {
+      width: calc(100% - 28px);
+      padding-top: 28px;
+    }
+
+    &__page-heading {
+      align-items: flex-start;
+    }
+
+    &__count {
+      padding: 8px 9px;
+
+      strong {
+        font-size: 17px;
+      }
+
+      span {
+        font-size: 9px;
+      }
+    }
+
+    &__form-fields {
+      grid-template-columns: 1fr;
+    }
+
+    &__field:last-child {
+      grid-column: auto;
+    }
+
+    &__browse {
+      display: none;
+    }
+
+    &__table th,
+    &__table td {
+      padding-inline: 7px;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .song-admin *,
+  .song-admin *::before,
+  .song-admin *::after {
+    transition-duration: 0.01ms !important;
+  }
+}

@@ -1,9 +1,9 @@
 require("dotenv").config();
 const dns = require("node:dns");
+dns.setServers(["8.8.8.8", "8.8.4.4"]);
 const connectToDB = require("./src/config/database.js");
 let redis;
 
-dns.setServers(["8.8.8.8", "8.8.4.4"]);
 
 const requiredEnvironmentVariables = [
     "MONGO_URI",

@@ -4,6 +4,7 @@ const path = require("path");
 const Authrouter = require("./routes/auth.routes.js");
 const cookieParser = require("cookie-parser");
 const Songrouter = require("./routes/song.routes.js");
+const adminrouter = require("./routes/admin.routes.js");
 
 const app = express();
 const allowedOrigins = (process.env.CORS_ORIGIN || "http://localhost:5173")
@@ -27,6 +28,7 @@ app.get("/health", (req, res) => {
 
 app.use("/api/auth",Authrouter);
 app.use("/api/songs",Songrouter);
+app.use("api/v1/admin",adminrouter);
 
 const publicDirectory = path.join(__dirname, "public");
 app.use(express.static(publicDirectory));
