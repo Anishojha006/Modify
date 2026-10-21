@@ -20,3 +20,7 @@ export async function login({
     return response.data;
 }
 
+export async function  getme(){
+    
+}
+

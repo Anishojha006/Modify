@@ -28,7 +28,7 @@ app.get("/health", (req, res) => {
 
 app.use("/api/auth",Authrouter);
 app.use("/api/songs",Songrouter);
-app.use("api/v1/admin",adminrouter);
+app.use("/api/v1/admin", adminrouter);
 
 const publicDirectory = path.join(__dirname, "public");
 app.use(express.static(publicDirectory));

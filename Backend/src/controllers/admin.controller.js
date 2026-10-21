@@ -43,11 +43,11 @@ async function adminLogin(req, res) {
         const token = jwt.sign({
             id: admin._id,
             username: admin.username,
-            role:"admin"
+            role: "admin"
 
         }, process.env.SECRET_KEY, { expiresIn: "3d" })
 
-        res.cookie("token", token,
+        res.cookie("admin_token", token,
             {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === "production",
@@ -60,9 +60,9 @@ async function adminLogin(req, res) {
         res.status(200).json({
             message: "Credentials verified successfully.",
             admin: {
-                id: adim._id,
+                id: admin._id,
                 username: admin.username,
-                role: admin.role
+                role: "admin"
             }
         });
     }
@@ -76,4 +76,83 @@ async function adminLogin(req, res) {
     }
 }
 
-module.exports = {adminLogin}
+async function getme(req, res) {
+    try {
+        const token = req.cookies.admin_token;
+
+        if (!token) {
+            return res.status(401).json({
+                message: "Unauthorized"
+            });
+        }
+        const isBlacklist = await redis.get(token);
+        if (isBlacklist) {
+            return res.status(404).json({
+                message: "invalid token"
+            })
+        }
+
+        const decoded = jwt.verify(
+            token,
+            process.env.SECRET_KEY,
+        );
+        if (decoded.role !== "admin" || !decoded.id) {
+            return res.status(401).json({
+                message: "Unauthorized"
+            });
+        }
+        const admin = await adminModel.findById(decoded.id);
+
+        if (!admin) {
+            return res.status(401).json({
+                message: "Unauthorized access"
+            });
+        }
+
+        return res.status(200).json({
+            message: "Admin login successfully",
+            admin: {
+                id: admin._id,
+                username: admin.username,
+                role: "admin"
+            }
+        });
+    }
+    catch (err) {
+        console.error("Admin authentication error", err);
+        return res.status(401).json({
+            message: "Unauthorized"
+        });
+    }
+}
+
+async function adminlogout(req, res) {
+    const token = req.cookies.admin_token;
+
+    if (!token) {
+        return res.status(401).json({
+            message: "No token found."
+        });
+    }
+
+    const decoded = jwt.decode(token);
+
+    const remainingTime = decoded.exp - Math.floor(Date.now() / 1000);
+
+    res.clearCookie("admin_token");
+
+    if (remainingTime > 0) {
+        await redis.set(
+            token,
+            "blacklisted",
+            "EX",
+            remainingTime
+        );
+    }
+
+    return res.status(200).json({
+        message: "Successfully logged out."
+    });
+}
+
+module.exports = { adminLogin, getme, adminlogout };
