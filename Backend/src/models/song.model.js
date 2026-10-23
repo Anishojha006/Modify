@@ -13,9 +13,17 @@ const songSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    fileId: {
+        type: String,
+    },
+    posterFileId: {
+        type: String,
+    },
     mood: {
         type: String,
+        required: true,
         lowercase: true,
+        unique: true,
         enum: {
             values: ["sad", "happy", "surprised", "angry", "neutral"],
             message: "Mood must be one of sad, happy, surprised, angry, neutral",

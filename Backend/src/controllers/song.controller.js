@@ -1,4 +1,5 @@
 const songModel = require("../models/song.model");
+const mongoose = require("mongoose");
 const id3 = require("node-id3");
 const storageServices = require("../service/storage.service.js");
 
@@ -28,6 +29,12 @@ function getPosterBuffer(tags) {
 }
 
 async function uploadSong(req, res) {
+    const data = req.user;
+    if (data.role !== "admin") {
+       return res.status(401).json({
+            message: "unauthorized access"
+        })
+    }
     try {
         const uploadedFile = req.file || (Array.isArray(req.files) ? req.files[0] : null);
 
@@ -44,6 +51,14 @@ async function uploadSong(req, res) {
         if (!VALID_MOODS.has(mood)) {
             return res.status(400).json({
                 message: "Mood is required and must be one of sad, happy, surprised, angry, neutral.",
+            });
+        }
+
+        const existingSong = await songModel.findOne({ mood }).select("_id title");
+        if (existingSong) {
+            return res.status(409).json({
+                message: `A song already exists for the ${mood} mood. Delete it before uploading another.`,
+                song: existingSong,
             });
         }
 
@@ -67,6 +82,8 @@ async function uploadSong(req, res) {
             title,
             url: storageFile.url,
             posterUrl: posterFile.url,
+            fileId: storageFile.fileId,
+            posterFileId: posterFile.fileId,
             mood,
         });
 
@@ -75,9 +92,45 @@ async function uploadSong(req, res) {
             song,
         });
     } catch (error) {
+        if (error.code === 11000 && error.keyPattern?.mood) {
+            return res.status(409).json({
+                message: "A song already exists for this mood. Delete it before uploading another.",
+            });
+        }
+
         console.error("Error uploading song:", error);
 
         res.status(500).json({
+            message: "Internal server error",
+            error: error.message,
+        });
+    }
+}
+
+async function deleteSong(req, res) {
+    try {
+        if (!mongoose.isValidObjectId(req.params.id)) {
+            return res.status(400).json({ message: "Invalid song ID." });
+        }
+
+        const song = await songModel.findById(req.params.id);
+        if (!song) {
+            return res.status(404).json({ message: "Song not found." });
+        }
+
+        const fileIds = [song.fileId, song.posterFileId].filter(Boolean);
+        await Promise.all(fileIds.map((fileId) => storageServices.deleteFile(fileId)));
+        await song.deleteOne();
+
+        return res.status(200).json({
+            message: "Song deleted successfully.",
+            ...(fileIds.length < 2 && {
+                warning: "One or more stored files did not have a saved ImageKit file ID and may remain in storage.",
+            }),
+        });
+    } catch (error) {
+        console.error("Error deleting song:", error);
+        return res.status(500).json({
             message: "Internal server error",
             error: error.message,
         });
@@ -116,5 +169,6 @@ async function getSong(req, res) {
 
 module.exports = {
     uploadSong,
+    deleteSong,
     getSong,
 };

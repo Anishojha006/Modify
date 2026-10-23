@@ -10,6 +10,7 @@ const request = require("supertest");
 process.env.SECRET_KEY = "qa-only-secret-for-automated-tests";
 
 const blacklistedTokens = new Set();
+const deletedFileIds = [];
 const redis = {
     async get(token) {
         return blacklistedTokens.has(token) ? "blacklisted" : null;
@@ -21,6 +22,18 @@ const redis = {
 };
 
 mock(path.resolve(__dirname, "../../src/config/cache.js"), redis);
+mock(path.resolve(__dirname, "../../src/service/storage.service.js"), {
+    DEFAULT_POSTER: Buffer.from("test-poster"),
+    async uploadFile({ filename, folder }) {
+        return {
+            url: `https://example.test${folder}/${filename}`,
+            fileId: `file-${filename}`,
+        };
+    },
+    async deleteFile(fileId) {
+        deletedFileIds.push(fileId);
+    },
+});
 
 let app;
 let mongo;
@@ -45,6 +58,7 @@ before(async () => {
 
 beforeEach(async () => {
     blacklistedTokens.clear();
+    deletedFileIds.length = 0;
     await Promise.all(
         Object.values(mongoose.connection.collections).map((collection) =>
             collection.deleteMany({}),
@@ -164,6 +178,83 @@ describe("HTTP API integration", () => {
 
     it("denies song upload unless the caller is authenticated as an admin", async () => {
         await request(app).post("/api/songs").expect(401);
+    });
+
+    it("enforces a unique song mood in the database", async () => {
+        const Song = require("../../src/models/song.model.js");
+        const song = {
+            title: "Happy song",
+            url: "https://example.test/happy.mp3",
+            posterUrl: "https://example.test/happy.jpg",
+            mood: "happy",
+        };
+        await Song.create(song);
+
+        await assert.rejects(
+            Song.create({ ...song, title: "Another happy song" }),
+            (error) => error.code === 11000,
+        );
+    });
+
+    it("rejects uploading another song for a mood that already has one", async () => {
+        const Admin = require("../../src/models/admin.model.js");
+        const Song = require("../../src/models/song.model.js");
+        await Admin.create({
+            username: "qa-admin",
+            passwordHash: await bcrypt.hash("long-test-admin-password", 12),
+        });
+        await Song.create({
+            title: "Existing happy song",
+            url: "https://example.test/existing.mp3",
+            posterUrl: "https://example.test/existing.jpg",
+            mood: "happy",
+        });
+        const agent = request.agent(app);
+
+        await agent
+            .post("/api/v1/admin/login")
+            .send({ username: "qa-admin", password: "long-test-admin-password" })
+            .expect(200);
+
+        const response = await agent
+            .post("/api/songs")
+            .field("mood", "happy")
+            .attach("song", Buffer.from("test audio"), "replacement.mp3")
+            .expect(409);
+
+        assert.match(response.body.message, /delete it before uploading another/i);
+        assert.equal(response.body.song.title, "Existing happy song");
+    });
+
+    it("allows an admin to delete a song and its stored files", async () => {
+        const Admin = require("../../src/models/admin.model.js");
+        const Song = require("../../src/models/song.model.js");
+        await Admin.create({
+            username: "qa-admin",
+            passwordHash: await bcrypt.hash("long-test-admin-password", 12),
+        });
+        const song = await Song.create({
+            title: "Happy song",
+            url: "https://example.test/happy.mp3",
+            posterUrl: "https://example.test/happy.jpg",
+            fileId: "happy-song-file",
+            posterFileId: "happy-poster-file",
+            mood: "happy",
+        });
+        const agent = request.agent(app);
+
+        await agent
+            .post("/api/v1/admin/login")
+            .send({ username: "qa-admin", password: "long-test-admin-password" })
+            .expect(200);
+
+        await agent.delete(`/api/songs/${song._id}`).expect(200);
+
+        assert.equal(await Song.countDocuments({ mood: "happy" }), 0);
+        assert.deepEqual(deletedFileIds.sort(), [
+            "happy-poster-file",
+            "happy-song-file",
+        ]);
     });
 
     it("returns an empty result for a mood with no matching songs", async () => {
