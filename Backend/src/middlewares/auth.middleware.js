@@ -1,35 +1,92 @@
-const userModel = require("../models/user.model.js");
-const blaclistModel = require("../models/blacklist.model.js");
 const jwt = require("jsonwebtoken");
-const redis = require("../config/cache.js")
+const crypto = require("crypto");
+const redis = require("../config/cache.js");
+const Session = require("../models/session.model.js");
 
 async function authUser(req, res, next) {
-    const token = req.cookies.token;
+    const token = req.cookies?.token;
+    const deviceSecret = req.cookies?.device_secret;
 
-    if (!token) {
+    if (!token || !deviceSecret) {
         return res.status(401).json({
-            message: "token not provided"
-        })
+            message: "Authentication or device verification required",
+        });
     }
-    const isBlacklist = await  redis.get(token);
-    if (isBlacklist) {
-        return res.status(404).json({
-            message: "invalid token"
-        })
-    }
+
     try {
+        
+        const isBlacklist = await redis.get(token);
+
+        if (isBlacklist) {
+            return res.status(401).json({
+                message: "Invalid or revoked token",
+            });
+        }
 
         const decoded = jwt.verify(
             token,
-            process.env.SECRET_KEY,
-        )
+            process.env.SECRET_KEY
+        );
+
+        if (!decoded.id || !decoded.sid) {
+            return res.status(401).json({
+                message: "Invalid token payload",
+            });
+        }
+
+      
+        const session = await Session.findOne({
+            sessionId: decoded.sid,
+            userId: decoded.id,
+            expiresAt: { $gt: new Date() },
+        });
+
+        if (!session) {
+            return res.status(401).json({
+                message: "Session expired or revoked",
+            });
+        }
+
+     
+        const suppliedHash = crypto
+            .createHash("sha256")
+            .update(deviceSecret)
+            .digest();
+
+        const storedHash = Buffer.from(
+            session.deviceSecretHash,
+            "hex"
+        );
+
+        if (
+            storedHash.length !== suppliedHash.length ||
+            !crypto.timingSafeEqual(suppliedHash, storedHash)
+        ) {
+            return res.status(403).json({
+                message: "This device is not authorized",
+            });
+        }
+
+     
         req.user = decoded;
-        next()
-    }
-    catch (err) {
-        return res.status(401).json({
-            message: "invalid token"
-        })
+        req.sessionId = decoded.sid;
+
+        return next();
+    } catch (err) {
+        if (
+            err.name === "JsonWebTokenError" ||
+            err.name === "TokenExpiredError"
+        ) {
+            return res.status(401).json({
+                message: "Invalid or expired token",
+            });
+        }
+
+        console.error("Authentication error:", err);
+
+        return res.status(500).json({
+            message: "Authentication failed",
+        });
     }
 }
 

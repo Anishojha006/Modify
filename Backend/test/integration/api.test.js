@@ -119,6 +119,15 @@ describe("HTTP API integration", () => {
             .post("/api/auth/register")
             .send({ username: "qa-user" })
             .expect(400);
+
+        await request(app)
+            .post("/api/auth/register")
+            .send({
+                username: {},
+                email: {},
+                password: {},
+            })
+            .expect(400);
     });
 
     it("authenticates a registered user and restores their session", async () => {
@@ -132,19 +141,28 @@ describe("HTTP API integration", () => {
         await agent.post("/api/auth/register").send(credentials).expect(201);
         await agent
             .post("/api/auth/login")
-            .send({ email: credentials.email, password: credentials.password })
+            .send({
+                email: credentials.email.toUpperCase(),
+                password: credentials.password,
+            })
             .expect(200);
 
         const response = await agent.get("/api/auth/get-me").expect(200);
         assert.equal(response.body.user.username, credentials.username);
+        assert.equal(response.body.user.email, credentials.email);
         assert.equal(response.body.user.password, undefined);
     });
 
     it("rejects invalid credentials and unauthenticated profile access", async () => {
         await request(app)
             .post("/api/auth/login")
-            .send({ email: "missing@example.com", password: "not-the-password" })
+            .send({})
             .expect(400);
+
+        await request(app)
+            .post("/api/auth/login")
+            .send({ email: "missing@example.com", password: "not-the-password" })
+            .expect(401);
 
         await request(app).get("/api/auth/get-me").expect(401);
     });
