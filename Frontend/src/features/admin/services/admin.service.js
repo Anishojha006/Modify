@@ -26,3 +26,7 @@ export async function getme() {
     const response = await api.get("/getme");
     return response.data;
 }
+
+// export async function logout(){
+//     const 
+// }

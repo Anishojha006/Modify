@@ -9,7 +9,7 @@ async function authUser(req, res, next) {
 
     if (!token || !deviceSecret) {
         return res.status(401).json({
-            message: "Authentication or device verification required",
+            message: "Authentication failed",
         });
     }
 
@@ -19,7 +19,7 @@ async function authUser(req, res, next) {
 
         if (isBlacklist) {
             return res.status(401).json({
-                message: "Invalid or revoked token",
+                message: "Authentication failed",
             });
         }
 
@@ -30,7 +30,7 @@ async function authUser(req, res, next) {
 
         if (!decoded.id || !decoded.sid) {
             return res.status(401).json({
-                message: "Invalid token payload",
+                message: "Authentication failed",
             });
         }
 
@@ -43,7 +43,7 @@ async function authUser(req, res, next) {
 
         if (!session) {
             return res.status(401).json({
-                message: "Session expired or revoked",
+                message: "Authentication failed",
             });
         }
 
@@ -63,7 +63,7 @@ async function authUser(req, res, next) {
             !crypto.timingSafeEqual(suppliedHash, storedHash)
         ) {
             return res.status(403).json({
-                message: "This device is not authorized",
+                message: "Authentication failed",
             });
         }
 
@@ -78,7 +78,7 @@ async function authUser(req, res, next) {
             err.name === "TokenExpiredError"
         ) {
             return res.status(401).json({
-                message: "Invalid or expired token",
+                message: "Authentication failed",
             });
         }
 
