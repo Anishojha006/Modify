@@ -7,6 +7,7 @@ import GuestRoute from "./GuestRoute.jsx";
 import NotFound from "../features/expression/pages/NotFound.jsx";
 import Adminlogin from "../features/admin/pages/Adminlogin.jsx";
 import Songupload from "../features/admin/pages/Songupload.jsx";
+import AdminProtectedRoute from "./AdminProtectedRoute.jsx";
 
 const AppRoutes = () => {
     return (
@@ -60,7 +61,11 @@ const AppRoutes = () => {
             />
             <Route
               path="/admin/songs"
-              element={<Songupload />}
+              element={
+                <AdminProtectedRoute>
+                    <Songupload />
+                </AdminProtectedRoute>
+              }
             />
             <Route path="*" element={<NotFound />} />
 
