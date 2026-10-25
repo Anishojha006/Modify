@@ -1,0 +1,47 @@
+$admin-bg: #0b1018;
+$admin-surface: #121a25;
+$admin-border: #26364a;
+$admin-text: #f4f7fb;
+$admin-muted: #a6adbb;
+$admin-accent: #65e6bd;
+
+.admin-logout {
+  min-height: 36px;
+  padding: 8px 14px;
+  border: 1px solid rgba(101, 230, 189, 0.3);
+  border-radius: 999px;
+  background: rgba(101, 230, 189, 0.08);
+  color: #dffef1;
+  font-family: system-ui, "Segoe UI", sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: transform 160ms ease, border-color 160ms ease, background-color 160ms ease, box-shadow 160ms ease;
+
+  &:hover {
+    border-color: rgba(101, 230, 189, 0.55);
+    background: rgba(101, 230, 189, 0.12);
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+
+  &:focus-visible {
+    outline: 2px solid $admin-accent;
+    outline-offset: 3px;
+  }
+
+  &:disabled {
+    opacity: 0.75;
+    cursor: wait;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .admin-logout {
+    transition: none;
+  }
+}

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
-import Loader from "../../auth/componenets/Loader.jsx";
+import Loader from "../../auth/components/Loader.jsx";
 import { useAdmin } from "../admin.context.jsx";
 import "../style/Adminlogin.scss";
 

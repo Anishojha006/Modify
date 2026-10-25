@@ -1,43 +1,33 @@
 import { useState } from "react";
+import useAdminSongs from "../hooks/useAdminSongs.js";
+import Logout from "../componenets/Logout.jsx";
 import "../style/Songupload.scss";
 
-const INITIAL_SONGS = [
-  { id: 1, title: "Golden Hour", artist: "JVKE", mood: "happy" },
-  { id: 2, title: "Weightless", artist: "Marconi Union", mood: "neutral" },
-  { id: 3, title: "Rainy Days", artist: "The Mood Collective", mood: "sad" },
-];
-
 const Songupload = () => {
-  const [songs, setSongs] = useState(INITIAL_SONGS);
-  const [title, setTitle] = useState("");
-  const [artist, setArtist] = useState("");
+  const {
+    songs,
+    loading,
+    uploading,
+    deletingSongId,
+    error,
+    handleUpload,
+    handleDelete,
+  } = useAdminSongs();
   const [mood, setMood] = useState("happy");
-  const [fileName, setFileName] = useState("");
+  const [file, setFile] = useState(null);
 
-  const handleUpload = (event) => {
+  const onUpload = async (event) => {
     event.preventDefault();
-    if (!title.trim() || !artist.trim() || !fileName) return;
+    if (!file) return;
 
-    setSongs((currentSongs) => [
-      {
-        id: Date.now(),
-        title: title.trim(),
-        artist: artist.trim(),
-        mood,
-      },
-      ...currentSongs,
-    ]);
-    setTitle("");
-    setArtist("");
-    setMood("happy");
-    setFileName("");
-    event.currentTarget.reset();
-  };
+    const form = event.currentTarget;
+    const uploaded = await handleUpload({ mood, file });
 
-  const handleDelete = (songId) => {
-    setSongs((currentSongs) =>
-      currentSongs.filter((song) => song.id !== songId)
-    );
+    if (uploaded) {
+      form.reset();
+      setFile(null);
+      setMood("happy");
+    }
   };
 
   return (
@@ -48,7 +38,10 @@ const Songupload = () => {
           Moodify
           <span className="song-admin__brand-label">ADMIN</span>
         </a>
-        <span className="song-admin__status">Music library</span>
+        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+          <span className="song-admin__status">Music library</span>
+          <Logout />
+        </div>
       </header>
 
       <div className="song-admin__main">
@@ -66,8 +59,14 @@ const Songupload = () => {
           </div>
         </div>
 
+        {error && (
+          <div className="song-admin__error" role="alert">
+            {error}
+          </div>
+        )}
+
         <div className="song-admin__notice" role="note">
-          This is a UI preview. Changes are temporary and are not saved.
+          Songs are loaded from the database. Uploads and deletions are saved to your music library.
         </div>
 
         <section className="song-admin__panel" aria-labelledby="upload-title">
@@ -79,28 +78,8 @@ const Songupload = () => {
             </div>
           </div>
 
-          <form className="song-admin__form" onSubmit={handleUpload}>
+          <form className="song-admin__form" onSubmit={onUpload}>
             <div className="song-admin__form-fields">
-              <label className="song-admin__field">
-                <span>Song title</span>
-                <input
-                  type="text"
-                  value={title}
-                  onChange={(event) => setTitle(event.target.value)}
-                  placeholder="e.g. Golden Hour"
-                  required
-                />
-              </label>
-              <label className="song-admin__field">
-                <span>Artist</span>
-                <input
-                  type="text"
-                  value={artist}
-                  onChange={(event) => setArtist(event.target.value)}
-                  placeholder="e.g. JVKE"
-                  required
-                />
-              </label>
               <label className="song-admin__field">
                 <span>Mood</span>
                 <select
@@ -120,21 +99,23 @@ const Songupload = () => {
               <input
                 type="file"
                 accept="audio/*"
-                onChange={(event) =>
-                  setFileName(event.target.files?.[0]?.name ?? "")
-                }
+                onChange={(event) => setFile(event.target.files?.[0] ?? null)}
                 required
               />
               <span className="song-admin__file-icon" aria-hidden="true">↑</span>
               <span className="song-admin__file-copy">
-                <strong>{fileName || "Choose an audio file"}</strong>
+                <strong>{file?.name || "Choose an audio file"}</strong>
                 <small>MP3 or other audio format</small>
               </span>
               <span className="song-admin__browse">Browse files</span>
             </label>
 
-            <button className="song-admin__primary-button" type="submit">
-              Add song to library
+            <button
+              className="song-admin__primary-button"
+              type="submit"
+              disabled={uploading || !file}
+            >
+              {uploading ? "Uploading..." : "Add song to library"}
             </button>
           </form>
         </section>
@@ -144,11 +125,13 @@ const Songupload = () => {
             <span className="song-admin__section-icon" aria-hidden="true">♫</span>
             <div>
               <h2 id="library-title">Existing songs</h2>
-              <p>Review tracks currently shown in this preview.</p>
+              <p>Tracks currently stored in your music library.</p>
             </div>
           </div>
 
-          {songs.length ? (
+          {loading ? (
+            <p className="song-admin__empty" role="status">Loading songs...</p>
+          ) : songs.length ? (
             <div className="song-admin__table-wrap">
               <table className="song-admin__table">
                 <thead>
@@ -160,7 +143,7 @@ const Songupload = () => {
                 </thead>
                 <tbody>
                   {songs.map((song, index) => (
-                    <tr key={song.id}>
+                    <tr key={song._id}>
                       <td>
                         <div className="song-admin__song">
                           <span
@@ -171,7 +154,11 @@ const Songupload = () => {
                           </span>
                           <span className="song-admin__song-details">
                             <strong>{song.title}</strong>
-                            <small>{song.artist}</small>
+                            <small>
+                              <a href={song.url} target="_blank" rel="noreferrer">
+                                Listen to track
+                              </a>
+                            </small>
                           </span>
                         </div>
                       </td>
@@ -184,10 +171,11 @@ const Songupload = () => {
                         <button
                           className="song-admin__delete"
                           type="button"
-                          onClick={() => handleDelete(song.id)}
+                          onClick={() => handleDelete(song._id)}
+                          disabled={deletingSongId === song._id}
                           aria-label={`Delete ${song.title}`}
                         >
-                          Delete
+                          {deletingSongId === song._id ? "Deleting..." : "Delete"}
                         </button>
                       </td>
                     </tr>
@@ -196,7 +184,7 @@ const Songupload = () => {
               </table>
             </div>
           ) : (
-            <p className="song-admin__empty">No songs in the library yet.</p>
+            <p className="song-admin__empty">No songs have been uploaded yet.</p>
           )}
         </section>
       </div>

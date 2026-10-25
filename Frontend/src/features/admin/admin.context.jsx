@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import { getme, login } from "./services/admin.service.js";
+import { getme, login, logout } from "./services/admin.service.js";
 
 const AdminContext = createContext(null);
 
@@ -34,8 +34,20 @@ export const AdminProvider = ({ children }) => {
         }
     };
 
+    const handleLogout = async () => {
+        setLoading(true);
+
+        try {
+            const response = await logout();
+            setAdmin(null);
+            return response;
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return (
-        <AdminContext.Provider value={{ admin, loading, handleLogin }}>
+        <AdminContext.Provider value={{ admin, loading, handleLogin, handleLogout }}>
             {children}
         </AdminContext.Provider>
     );

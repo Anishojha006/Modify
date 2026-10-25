@@ -3,6 +3,7 @@ const Adminroutes = require("../controllers/admin.controller");
 const adminrouter = Router();
 
 adminrouter.post("/login", Adminroutes.adminLogin);
-adminrouter.get("/getme",Adminroutes.getme);
+adminrouter.get("/getme", Adminroutes.getme);
+adminrouter.post("/logout", Adminroutes.adminlogout);
 
 module.exports = adminrouter;

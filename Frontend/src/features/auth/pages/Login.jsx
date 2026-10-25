@@ -3,7 +3,7 @@ import { useAuth } from "../hooks/useAuth.js";
 import "../style/login.scss";
 import "../style/buttons/LoginButtons.scss";
 import { Link, useNavigate } from "react-router-dom";
-import Loader from "../componenets/Loader.jsx";
+import Loader from "../components/Loader.jsx";
 
 const Login = () => {
     const {

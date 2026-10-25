@@ -144,6 +144,17 @@ $library-accent: #65e6bd;
     line-height: 1.5;
   }
 
+  &__error {
+    margin-bottom: 18px;
+    padding: 11px 14px;
+    border: 1px solid rgba(255, 112, 112, 0.3);
+    border-radius: 8px;
+    background: rgba(255, 112, 112, 0.08);
+    color: #ffb0b0;
+    font-size: 12px;
+    line-height: 1.5;
+  }
+
   &__panel {
     margin-top: 18px;
     padding: clamp(18px, 3vw, 26px);
@@ -322,6 +333,12 @@ $library-accent: #65e6bd;
     cursor: pointer;
     transition: background-color 160ms ease, transform 160ms ease;
 
+    &:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
+      transform: none;
+    }
+
     &:hover {
       transform: translateY(-1px);
       background: #7cebc8;
@@ -407,6 +424,15 @@ $library-accent: #65e6bd;
     small {
       color: $library-muted;
       font-size: 10px;
+
+      a {
+        color: inherit;
+        text-decoration-color: rgba(166, 173, 187, 0.45);
+
+        &:hover {
+          color: $library-accent;
+        }
+      }
     }
   }
 
@@ -434,6 +460,11 @@ $library-accent: #65e6bd;
     font-size: 10px;
     cursor: pointer;
     transition: background-color 150ms ease;
+
+    &:disabled {
+      opacity: 0.65;
+      cursor: wait;
+    }
 
     &:hover {
       background: rgba(255, 112, 112, 0.16);

@@ -1,5 +1,5 @@
 import { Navigate } from "react-router-dom";
-import Loader from "../features/auth/componenets/Loader.jsx";
+import Loader from "../features/auth/components/Loader.jsx";
 import { useAdmin } from "../features/admin/admin.context.jsx";
 
 const AdminProtectedRoute = ({ children }) => {

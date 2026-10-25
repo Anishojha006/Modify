@@ -10,8 +10,7 @@ const adminSchema = new mongoose.Schema({
     },
     passwordHash: {
         type: String,
-        default: "admin",
-        immuatable: true
+        immutable: true
     },
 },
 {

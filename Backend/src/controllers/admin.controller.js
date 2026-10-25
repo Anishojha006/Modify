@@ -3,6 +3,16 @@ const adminModel = require("../models/admin.model.js");
 const jwt = require("jsonwebtoken");
 const redis = require("../config/cache.js");
 
+function getAdminCookieOptions() {
+    return {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+        path: "/",
+        maxAge: 3 * 24 * 60 * 60 * 1000,
+    };
+}
+
 async function adminLogin(req, res) {
     try {
         const { username, password } = req.body;
@@ -47,14 +57,7 @@ async function adminLogin(req, res) {
 
         }, process.env.SECRET_KEY, { expiresIn: "3d" })
 
-        res.cookie("admin_token", token,
-            {
-                httpOnly: true,
-                secure: process.env.NODE_ENV === "production",
-                sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
-                maxAge: 3 * 24 * 60 * 60 * 1000
-            }
-        )
+        res.cookie("admin_token", token, getAdminCookieOptions());
 
 
         res.status(200).json({
@@ -70,7 +73,7 @@ async function adminLogin(req, res) {
         console.error("Admin login error", error);
 
         return res.status(500).json({
-            message: "An internal server error occured.",
+            message: "An internal server error occurred.",
         });
 
     }
@@ -110,7 +113,7 @@ async function getme(req, res) {
         }
 
         return res.status(200).json({
-            message: "Admin login successfully",
+            message: "Admin logged in successfully.",
             admin: {
                 id: admin._id,
                 username: admin.username,

@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { detectExpression, setup } from "../utills/utils";
+import { detectExpression, setup } from "../utils/utils.js";
 import { useAuth } from "../../auth/hooks/useAuth.js"
-import Loader from "../../auth/componenets/Loader.jsx";
+import Loader from "../../auth/components/Loader.jsx";
 import Player from "../../Home/components/Player.jsx";
 import { useSong } from "../../Home/hooks/useSongs.js";
 import "../style/FaceExpression.scss";

@@ -8,6 +8,7 @@ import NotFound from "../features/expression/pages/NotFound.jsx";
 import Adminlogin from "../features/admin/pages/Adminlogin.jsx";
 import Songupload from "../features/admin/pages/Songupload.jsx";
 import AdminProtectedRoute from "./AdminProtectedRoute.jsx";
+import { AdminSongsProvider } from "../features/admin/adminSongs.context.jsx";
 
 const AppRoutes = () => {
     return (
@@ -63,7 +64,9 @@ const AppRoutes = () => {
               path="/admin/songs"
               element={
                 <AdminProtectedRoute>
-                    <Songupload />
+                    <AdminSongsProvider>
+                        <Songupload />
+                    </AdminSongsProvider>
                 </AdminProtectedRoute>
               }
             />
