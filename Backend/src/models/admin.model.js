@@ -10,6 +10,8 @@ const adminSchema = new mongoose.Schema({
     },
     passwordHash: {
         type: String,
+        required: true,
+        match: /^\$2[aby]\$\d{2}\$[./A-Za-z0-9]{53}$/,
         immutable: true
     },
 },

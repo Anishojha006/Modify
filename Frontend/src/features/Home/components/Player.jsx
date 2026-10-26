@@ -211,7 +211,7 @@ const Player = () => {
                     />
                 </div>
 
-                <audio ref={audioRef} src={song.url} preload="metadata" />
+                <audio ref={audioRef} src={song.url || undefined} preload="metadata" />
             </div>
         </aside>
     );

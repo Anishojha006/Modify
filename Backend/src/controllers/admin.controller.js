@@ -4,6 +4,7 @@ const jwt = require("jsonwebtoken");
 const redis = require("../config/cache.js");
 
 const { setCsrfTokenCookie } = require("../middlewares/csrf.middleware.js");
+const { sendApiError } = require("../utils/apiError.js");
 
 function getAdminCookieOptions() {
     return {
@@ -17,7 +18,7 @@ function getAdminCookieOptions() {
 
 async function adminLogin(req, res) {
     try {
-        const { username, password } = req.body;
+        const { username, password } = req.body || {};
 
         if (
             typeof username !== "string"
@@ -27,9 +28,7 @@ async function adminLogin(req, res) {
             !username.trim() ||
             !password
         ) {
-            return res.status(401).json({
-                message: "invalid credentials"
-            });
+            return sendApiError(res, 401, "Invalid credentials");
         }
 
         const admin = await adminModel.findOne(({
@@ -37,9 +36,7 @@ async function adminLogin(req, res) {
         }))
 
         if (!admin) {
-            return res.status(401).json({
-                message: "invalid credentials"
-            })
+            return sendApiError(res, 401, "Invalid credentials");
         }
 
         const isPasswordValid = await bcrypt.compare(
@@ -47,9 +44,7 @@ async function adminLogin(req, res) {
             admin.passwordHash
         )
         if (!isPasswordValid) {
-            return res.status(401).json({
-                message: "invalid credentials"
-            })
+            return sendApiError(res, 401, "Invalid credentials");
         }
 
         const token = jwt.sign({
@@ -74,9 +69,7 @@ async function adminLogin(req, res) {
     catch (error) {
         console.error("Admin login error", error);
 
-        return res.status(500).json({
-            message: "An internal server error occurred.",
-        });
+        return sendApiError(res, 500, "An internal server error occurred.");
 
     }
 }
@@ -86,15 +79,11 @@ async function getme(req, res) {
         const token = req.cookies.admin_token;
 
         if (!token) {
-            return res.status(401).json({
-                message: "Unauthorized"
-            });
+            return sendApiError(res, 401, "Unauthorized");
         }
         const isBlacklist = await redis.get(token);
         if (isBlacklist) {
-            return res.status(404).json({
-                message: "invalid token"
-            })
+            return sendApiError(res, 401, "Invalid token");
         }
 
         const decoded = jwt.verify(
@@ -102,16 +91,12 @@ async function getme(req, res) {
             process.env.SECRET_KEY,
         );
         if (decoded.role !== "admin" || !decoded.id) {
-            return res.status(401).json({
-                message: "Unauthorized"
-            });
+            return sendApiError(res, 401, "Unauthorized");
         }
         const admin = await adminModel.findById(decoded.id);
 
         if (!admin) {
-            return res.status(401).json({
-                message: "Unauthorized access"
-            });
+            return sendApiError(res, 401, "Unauthorized access");
         }
 
         return res.status(200).json({
@@ -124,41 +109,45 @@ async function getme(req, res) {
         });
     }
     catch (err) {
+        if (
+            ["JsonWebTokenError", "TokenExpiredError", "NotBeforeError"].includes(err.name)
+        ) {
+            return sendApiError(res, 401, "Unauthorized");
+        }
+
         console.error("Admin authentication error", err);
-        return res.status(401).json({
-            message: "Unauthorized"
-        });
+        return sendApiError(res, 500, "Unable to verify admin session.");
     }
 }
 
 async function adminlogout(req, res) {
-    const token = req.cookies.admin_token;
+    try {
+        const token = req.cookies?.admin_token;
+        const decoded = token ? jwt.decode(token) : null;
+        const remainingTime = decoded?.exp
+            ? decoded.exp - Math.floor(Date.now() / 1000)
+            : 0;
 
-    if (!token) {
-        return res.status(401).json({
-            message: "No token found."
+        if (token && remainingTime > 0) {
+            await redis.set(token, "blacklisted", "EX", remainingTime);
+        }
+
+        const cookieOptions = {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "lax",
+            path: "/",
+        };
+        res.clearCookie("admin_token", cookieOptions);
+        res.clearCookie("csrf_token", { ...cookieOptions, httpOnly: false });
+
+        return res.status(200).json({
+            message: "Successfully logged out."
         });
+    } catch (error) {
+        console.error("Admin logout error:", error);
+        return sendApiError(res, 500, "Unable to log out admin.");
     }
-
-    const decoded = jwt.decode(token);
-
-    const remainingTime = decoded.exp - Math.floor(Date.now() / 1000);
-
-    res.clearCookie("admin_token");
-    res.clearCookie("csrf_token", { httpOnly: false, sameSite: "lax", secure: process.env.NODE_ENV === "production", path: "/" });
-
-    if (remainingTime > 0) {
-        await redis.set(
-            token,
-            "blacklisted",
-            "EX",
-            remainingTime
-        );
-    }
-
-    return res.status(200).json({
-        message: "Successfully logged out."
-    });
 }
 
 module.exports = { adminLogin, getme, adminlogout };

@@ -8,7 +8,7 @@ const adminVerification = require("../middlewares/requireAdmin.js");
  * @api  api/songs
  * @description Upload a song.
  */
-router.post("/",adminVerification, upload.any(), songController.uploadSong);
+router.post("/", adminVerification, upload.single("song"), songController.uploadSong);
 router.delete("/:id", adminVerification, songController.deleteSong);
 
 /**

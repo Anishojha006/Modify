@@ -6,6 +6,7 @@ const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 const redis = require("../config/cache.js");
 const { setCsrfTokenCookie } = require("../middlewares/csrf.middleware.js");
+const { sendApiError } = require("../utils/apiError.js");
 
 const SESSION_DURATION = 3 * 24 * 60 * 60 * 1000;
 
@@ -86,9 +87,7 @@ async function registerUser(req, res) {
             typeof email !== "string" ||
             typeof password !== "string"
         ) {
-            return res.status(400).json({
-                message: "Username, email and password must be provided as text",
-            });
+            return sendApiError(res, 400, "Username, email and password must be provided as text");
         }
 
         const normalizedUsername = username.trim();
@@ -100,10 +99,11 @@ async function registerUser(req, res) {
             !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail) ||
             password.length < 8
         ) {
-            return res.status(400).json({
-                message:
-                    "Use a username of 3-50 characters, a valid email, and a password of at least 8 characters.",
-            });
+            return sendApiError(
+                res,
+                400,
+                "Use a username of 3-50 characters, a valid email, and a password of at least 8 characters."
+            );
         }
 
         const existingUser = await userModel.findOne({
@@ -114,9 +114,7 @@ async function registerUser(req, res) {
         });
 
         if (existingUser) {
-            return res.status(409).json({
-                message: "User already registered",
-            });
+            return sendApiError(res, 409, "User already registered");
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
@@ -130,22 +128,16 @@ async function registerUser(req, res) {
         return await createDeviceSession(req, res, user, 201);
     } catch (error) {
         if (error.code === 11000) {
-            return res.status(409).json({
-                message: "Username or email is already registered",
-            });
+            return sendApiError(res, 409, "Username or email is already registered");
         }
 
         if (error.name === "ValidationError") {
-            return res.status(400).json({
-                message: error.message,
-            });
+            return sendApiError(res, 400, error.message, "VALIDATION_ERROR");
         }
 
         console.error("Registration error:", error);
 
-        return res.status(500).json({
-            message: "Unable to register user",
-        });
+        return sendApiError(res, 500, "Unable to register user");
     }
 }
 
@@ -163,9 +155,7 @@ async function loginUser(req, res) {
             typeof password !== "string" ||
             !password
         ) {
-            return res.status(400).json({
-                message: "Provide username or email and password",
-            });
+            return sendApiError(res, 400, "Provide username or email and password");
         }
 
         const identifiers = [];
@@ -186,9 +176,7 @@ async function loginUser(req, res) {
             .select("+password");
 
         if (!user) {
-            return res.status(401).json({
-                message: "Invalid credentials",
-            });
+            return sendApiError(res, 401, "Invalid credentials");
         }
 
         const passwordMatches = await bcrypt.compare(
@@ -197,18 +185,14 @@ async function loginUser(req, res) {
         );
 
         if (!passwordMatches) {
-            return res.status(401).json({
-                message: "Invalid credentials",
-            });
+            return sendApiError(res, 401, "Invalid credentials");
         }
 
         return await createDeviceSession(req, res, user);
     } catch (error) {
         console.error("Login error:", error);
 
-        return res.status(500).json({
-            message: "Unable to log in",
-        });
+        return sendApiError(res, 500, "Unable to log in");
     }
 }
 
@@ -218,9 +202,7 @@ async function getme(req, res) {
         const user = await userModel.findById(req.user.id);
 
         if (!user) {
-            return res.status(404).json({
-                message: "User not found",
-            });
+            return sendApiError(res, 404, "User not found");
         }
 
         return res.status(200).json({
@@ -230,9 +212,7 @@ async function getme(req, res) {
     } catch (error) {
         console.error("Get user error:", error);
 
-        return res.status(500).json({
-            message: "Unable to fetch user",
-        });
+        return sendApiError(res, 500, "Unable to fetch user");
     }
 }
 
@@ -283,9 +263,7 @@ async function logout(req, res) {
     } catch (error) {
         console.error("Logout error:", error);
 
-        return res.status(500).json({
-            message: "Unable to log out",
-        });
+        return sendApiError(res, 500, "Unable to log out");
     }
 }
 

@@ -3,7 +3,7 @@ const Authrouter = Router();
 const authController = require("../controllers/auth.controller.js");
 const AuthMiddleware = require("../middlewares/auth.middleware.js");
 const { authLimiter } = require(
-  "../middleware/rateLimit.middleware.js"
+  "../middlewares/rateLimit.middleware.js"
 );
 
 Authrouter.post("/register",authLimiter,authController.registerUser);

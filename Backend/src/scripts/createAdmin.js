@@ -1,7 +1,5 @@
 const path = require("node:path");
 require("dotenv").config({ path: path.resolve(__dirname, "../../.env") });
-const dns = require("node:dns");
-dns.setServers(["8.8.8.8", "8.8.4.4"]);
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const readline = require("node:readline/promises");
@@ -19,7 +17,7 @@ async function createAdmin() {
 
     const password = await rl.question("Enter admin password: ");
 
-    if (username.length < 3 || username.length > 10) {
+    if (username.length < 3 || username.length > 50) {
       throw new Error("Username must be between 3 and 50 characters.");
     }
 
@@ -54,7 +52,14 @@ async function createAdmin() {
     process.exitCode = 1;
   } finally {
     rl.close();
-    await mongoose.disconnect().catch(() => {});
+    if (mongoose.connection.readyState !== 0) {
+      try {
+        await mongoose.disconnect();
+      } catch (error) {
+        console.error("Unable to disconnect from MongoDB:", error);
+        process.exitCode = 1;
+      }
+    }
   }
 }
 

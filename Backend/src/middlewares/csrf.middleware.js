@@ -1,4 +1,5 @@
 const crypto = require("crypto");
+const { sendApiError } = require("../utils/apiError.js");
 
 const CSRF_COOKIE_NAME = "csrf_token";
 
@@ -38,8 +39,13 @@ function requireCsrfToken(req, res, next) {
     const cookieToken = req.cookies?.csrf_token;
     const headerToken = req.headers["x-csrf-token"];
 
-    if (!cookieToken || !headerToken) {
-        return res.status(403).json({ message: "Invalid CSRF token." });
+    if (
+        typeof cookieToken !== "string"
+        || typeof headerToken !== "string"
+        || !cookieToken
+        || !headerToken
+    ) {
+        return sendApiError(res, 403, "Invalid CSRF token.", "CSRF_TOKEN_INVALID");
     }
 
     try {
@@ -50,10 +56,10 @@ function requireCsrfToken(req, res, next) {
             cookieBuffer.length !== headerBuffer.length ||
             !crypto.timingSafeEqual(cookieBuffer, headerBuffer)
         ) {
-            return res.status(403).json({ message: "Invalid CSRF token." });
+            return sendApiError(res, 403, "Invalid CSRF token.", "CSRF_TOKEN_INVALID");
         }
-    } catch (error) {
-        return res.status(403).json({ message: "Invalid CSRF token." });
+    } catch {
+        return sendApiError(res, 403, "Invalid CSRF token.", "CSRF_TOKEN_INVALID");
     }
 
     return next();

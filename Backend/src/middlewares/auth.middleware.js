@@ -2,15 +2,14 @@ const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 const redis = require("../config/cache.js");
 const Session = require("../models/session.model.js");
+const { sendApiError } = require("../utils/apiError.js");
 
 async function authUser(req, res, next) {
     const token = req.cookies?.token;
     const deviceSecret = req.cookies?.device_secret;
 
     if (!token || !deviceSecret) {
-        return res.status(401).json({
-            message: "Authentication failed",
-        });
+        return sendApiError(res, 401, "Authentication failed");
     }
 
     try {
@@ -18,9 +17,7 @@ async function authUser(req, res, next) {
         const isBlacklist = await redis.get(token);
 
         if (isBlacklist) {
-            return res.status(401).json({
-                message: "Authentication failed",
-            });
+            return sendApiError(res, 401, "Authentication failed");
         }
 
         const decoded = jwt.verify(
@@ -29,9 +26,7 @@ async function authUser(req, res, next) {
         );
 
         if (!decoded.id || !decoded.sid) {
-            return res.status(401).json({
-                message: "Authentication failed",
-            });
+            return sendApiError(res, 401, "Authentication failed");
         }
 
       
@@ -42,9 +37,7 @@ async function authUser(req, res, next) {
         });
 
         if (!session) {
-            return res.status(401).json({
-                message: "Authentication failed",
-            });
+            return sendApiError(res, 401, "Authentication failed");
         }
 
      
@@ -62,9 +55,7 @@ async function authUser(req, res, next) {
             storedHash.length !== suppliedHash.length ||
             !crypto.timingSafeEqual(suppliedHash, storedHash)
         ) {
-            return res.status(403).json({
-                message: "Authentication failed",
-            });
+            return sendApiError(res, 403, "Authentication failed");
         }
 
      
@@ -74,19 +65,14 @@ async function authUser(req, res, next) {
         return next();
     } catch (err) {
         if (
-            err.name === "JsonWebTokenError" ||
-            err.name === "TokenExpiredError"
+            ["JsonWebTokenError", "TokenExpiredError", "NotBeforeError"].includes(err.name)
         ) {
-            return res.status(401).json({
-                message: "Authentication failed",
-            });
+            return sendApiError(res, 401, "Authentication failed");
         }
 
         console.error("Authentication error:", err);
 
-        return res.status(500).json({
-            message: "Authentication failed",
-        });
+        return sendApiError(res, 500, "Authentication failed");
     }
 }
 

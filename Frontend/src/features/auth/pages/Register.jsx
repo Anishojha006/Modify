@@ -9,6 +9,7 @@ import "../style/Register.scss";
 import "../style/buttons/RegisterButtons.scss";
 
 import { useAuth } from "../hooks/useAuth.js";
+import { getErrorMessage } from "../../../services/errorMessage.js";
 
 
 const Register = () => {
@@ -178,11 +179,7 @@ const Register = () => {
 
         } catch (err) {
 
-            setError(
-                err?.response?.data?.message ||
-                err?.response?.data?.error ||
-                "Registration failed. Please try again."
-            );
+            setError(getErrorMessage(err, "Registration failed. Please try again."));
         }
     };
 

@@ -1,7 +1,6 @@
 
 const ImageKit = require("@imagekit/nodejs");
 const { toFile } = require("@imagekit/nodejs");
-const songModel = require("../models/song.model");
 
 const DEFAULT_POSTER = Buffer.from(
     "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAF" +
@@ -38,15 +37,6 @@ async function uploadFile({ buffer, filename, folder = "" }) {
 
         if (!filename) {
             throw new Error("Filename is required.");
-        }
-
-        // Check whether the filename already exists
-        const filenameExist = await songModel.findOne({ filename });
-
-        if (filenameExist) {
-            const error = new Error("File already exists.");
-            error.statusCode = 409;
-            throw error;
         }
 
         // Get a valid Node.js Buffer

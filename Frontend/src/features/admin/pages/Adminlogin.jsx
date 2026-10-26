@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import Loader from "../../auth/components/Loader.jsx";
 import { useAdmin } from "../admin.context.jsx";
+import { getErrorMessage } from "../../../services/errorMessage.js";
 import "../style/Adminlogin.scss";
 
 const Adminlogin = () => {
@@ -33,9 +34,7 @@ const Adminlogin = () => {
             await handleLogin(formData);
             navigate("/admin/songs", { replace: true });
         } catch (err) {
-            setError(
-                err.response?.data?.message || "Login failed. Please try again."
-            );
+            setError(getErrorMessage(err, "Login failed. Please try again."));
         } finally {
             setLoading(false);
         }

@@ -5,11 +5,12 @@ import { useAuth } from "../../auth/hooks/useAuth.js"
 import Loader from "../../auth/components/Loader.jsx";
 import Player from "../../Home/components/Player.jsx";
 import { useSong } from "../../Home/hooks/useSongs.js";
+import { getErrorMessage } from "../../../services/errorMessage.js";
 import "../style/FaceExpression.scss";
 
 const FaceExpression = () => {
     const navigate = useNavigate();
-    const { loading: authLoading, setUser, handleLogout } = useAuth();
+    const { loading: authLoading, handleLogout } = useAuth();
     const { handleGetSongs, preparePlayback, restorePlaybackAudio } = useSong();
     const videoRef = useRef(null);
     const faceLandmarkerRef = useRef(null);
@@ -60,7 +61,10 @@ const FaceExpression = () => {
             await handleGetSongs({ mood: detectedExpression });
         } catch (error) {
             console.error("Unable to load a song for the detected expression:", error);
-            setError("Expression detected, but a matching song could not be loaded.");
+            setError(getErrorMessage(
+                error,
+                "Expression detected, but a matching song could not be loaded."
+            ));
             restorePlaybackAudio();
         }
     };
@@ -133,6 +137,7 @@ const FaceExpression = () => {
             }, 220);
         } catch (error) {
             console.error("Logout failed:", error);
+            setError(getErrorMessage(error, "Unable to log out. Please try again."));
             setIsLoggingOut(false);
             startCamera();
         }

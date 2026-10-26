@@ -4,6 +4,7 @@ import "../style/login.scss";
 import "../style/buttons/LoginButtons.scss";
 import { Link, useNavigate } from "react-router-dom";
 import Loader from "../components/Loader.jsx";
+import { getErrorMessage } from "../../../services/errorMessage.js";
 
 const Login = () => {
     const {
@@ -41,11 +42,7 @@ const Login = () => {
 
             navigate("/dashboard");
         } catch (err) {
-            setError(
-                err?.response?.data?.message ||
-                err.message ||
-                "Login failed. Please check your credentials."
-            );
+            setError(getErrorMessage(err, "Login failed. Please check your credentials."));
         }
     };
 

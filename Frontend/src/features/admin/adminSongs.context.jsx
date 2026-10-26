@@ -4,11 +4,9 @@ import {
     getSongs,
     uploadSong,
 } from "./services/adminSongs.service.js";
+import { getErrorMessage } from "../../services/errorMessage.js";
 
 const AdminSongsContext = createContext(null);
-
-const getErrorMessage = (error, fallback) =>
-    error.response?.data?.message || fallback;
 
 export const AdminSongsProvider = ({ children }) => {
     const [songs, setSongs] = useState([]);

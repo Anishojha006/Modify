@@ -1,5 +1,6 @@
 import axios from "axios";
 import { apiBaseUrl } from "../../../services/apiBaseUrl.js";
+import { attachCsrfHeader } from "../../../services/csrf.js";
 
 const apiRootUrl = apiBaseUrl?.replace(/\/api\/auth\/?$/, "") ?? "";
 
@@ -7,6 +8,8 @@ const api = axios.create({
     baseURL: apiRootUrl,
     withCredentials: true,
 });
+
+api.interceptors.request.use((config) => attachCsrfHeader(config));
 
 const SONG_MOODS = ["happy", "sad", "angry", "surprised", "neutral"];
 

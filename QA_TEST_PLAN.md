@@ -15,11 +15,15 @@
 | POST | `/api/auth/register` | Register user |
 | POST | `/api/auth/login` | Authenticate user |
 | GET | `/api/auth/get-me` | Restore user session; user JWT required |
-| GET | `/api/auth/logout` | Clear and blacklist user JWT |
+| POST | `/api/auth/logout` | Clear and blacklist user JWT |
 | POST | `/api/v1/admin/login` | Authenticate admin |
 | GET | `/api/v1/admin/getme` | Restore admin session |
+| POST | `/api/v1/admin/logout` | Revoke admin session |
 | POST | `/api/songs` | Upload a song |
+| DELETE | `/api/songs/:id` | Delete a song and stored files |
 | GET | `/api/songs?mood=...` | Fetch one song for a mood |
+| GET | `/api/csrf-token` | Issue a CSRF token |
+| GET | `/ready` | Report MongoDB and Redis readiness |
 
 ### Models
 
@@ -75,10 +79,16 @@ npm test
 
 `Backend/test/integration/api.test.js` starts and stops its own in-memory MongoDB instance. It mocks Redis and does not upload files to ImageKit.
 
-## Known gaps observed during inspection
+## Environment and coverage limits
 
-- Song upload is currently mounted without an admin authentication middleware. Its regression test is expected to fail until server-side authorization is added.
-- Backend user registration does not validate required fields before querying/hashing; the incomplete-input regression test is expected to fail until input validation returns a 4xx response.
-- The admin schema currently supplies `"admin"` as a default password hash. Its regression test is expected to fail until admin credentials are always explicitly provisioned as a password hash.
-- Admin login and song management pages are currently UI-only; they do not call the admin or song APIs. E2E coverage does not claim those admin journeys work.
-- This test suite does not replace real-service tests for MongoDB, Redis, or ImageKit. No production credentials or data should be used for local test runs.
+- Integration tests use an ephemeral MongoDB database named
+  `modify_qa_test`, an in-memory rate-limit store, and mocked Redis and
+  ImageKit behavior. They do not verify the production Redis store or external
+  service availability.
+- Browser E2E tests mock API responses. They validate selected frontend flows,
+  not deployed end-to-end behavior.
+- Production limits are backed by Redis; configure `TRUST_PROXY` only for the
+  deployment's actual proxy topology.
+- No automated backup, restore, load, or production monitoring checks are
+  provided by this repository.
+- Do not use production credentials or data during local test runs.

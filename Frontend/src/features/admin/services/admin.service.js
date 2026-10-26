@@ -1,6 +1,6 @@
 import axios from "axios";
 import { apiBaseUrl } from "../../../services/apiBaseUrl.js";
-
+import { attachCsrfHeader } from "../../../services/csrf.js";
 
 const apiRootUrl = apiBaseUrl?.replace(/\/api\/auth\/?$/, "") ?? "";
 
@@ -8,6 +8,8 @@ const api = axios.create({
     baseURL: `${apiRootUrl}/api/v1/admin`,
     withCredentials: true,
 });
+
+api.interceptors.request.use((config) => attachCsrfHeader(config));
 
 
 export async function login({

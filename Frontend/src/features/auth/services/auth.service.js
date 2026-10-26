@@ -1,11 +1,13 @@
 import axios from "axios";
 import { apiBaseUrl } from "../../../services/apiBaseUrl.js";
-
+import { attachCsrfHeader } from "../../../services/csrf.js";
 
 const api = axios.create({
     baseURL: apiBaseUrl,
-    withCredentials:true,
+    withCredentials: true,
 });
+
+api.interceptors.request.use((config) => attachCsrfHeader(config));
 
 
 export async function register({
@@ -45,7 +47,7 @@ export async function getme() {
 }
 
 export async function logout() {
-    const response = await api.get("/logout");
+    const response = await api.post("/logout");
 
     return response.data;
 }

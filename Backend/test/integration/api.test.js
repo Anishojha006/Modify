@@ -7,11 +7,15 @@ const mongoose = require("mongoose");
 const { MongoMemoryServer } = require("mongodb-memory-server");
 const request = require("supertest");
 
+process.env.NODE_ENV = "test";
 process.env.SECRET_KEY = "qa-only-secret-for-automated-tests";
 
+const { resetRateLimitStores } = require("../../src/middlewares/rateLimit.middleware.js");
 const blacklistedTokens = new Set();
 const deletedFileIds = [];
+let uploadFailureFilename = null;
 const redis = {
+    status: "ready",
     async get(token) {
         return blacklistedTokens.has(token) ? "blacklisted" : null;
     },
@@ -25,6 +29,10 @@ mock(path.resolve(__dirname, "../../src/config/cache.js"), redis);
 mock(path.resolve(__dirname, "../../src/service/storage.service.js"), {
     DEFAULT_POSTER: Buffer.from("test-poster"),
     async uploadFile({ filename, folder }) {
+        if (filename === uploadFailureFilename) {
+            throw new Error("Simulated storage outage");
+        }
+
         return {
             url: `https://example.test${folder}/${filename}`,
             fileId: `file-${filename}`,
@@ -57,8 +65,10 @@ before(async () => {
 });
 
 beforeEach(async () => {
+    await resetRateLimitStores();
     blacklistedTokens.clear();
     deletedFileIds.length = 0;
+    uploadFailureFilename = null;
     await Promise.all(
         Object.values(mongoose.connection.collections).map((collection) =>
             collection.deleteMany({}),
@@ -80,6 +90,21 @@ describe("HTTP API integration", () => {
     it("reports application health", async () => {
         const response = await request(app).get("/health").expect(200);
         assert.deepEqual(response.body, { status: "ok" });
+        assert.equal(response.headers["x-powered-by"], undefined);
+    });
+
+    it("reports readiness only after database and Redis are connected", async () => {
+        const response = await request(app).get("/ready").expect(200);
+        assert.deepEqual(response.body, { status: "ready" });
+    });
+
+    it("returns a standard error for unknown API routes", async () => {
+        const response = await request(app)
+            .get("/api/not-a-route")
+            .expect(404);
+
+        assert.equal(response.body.success, false);
+        assert.equal(response.body.error.code, "NOT_FOUND");
     });
 
     it("registers a user without returning the password", async () => {
@@ -95,7 +120,10 @@ describe("HTTP API integration", () => {
         assert.equal(response.body.user.username, "qa-user");
         assert.equal(response.body.user.email, "qa@example.com");
         assert.equal(response.body.user.password, undefined);
-        assert.match(response.headers["set-cookie"][0], /HttpOnly/i);
+        const userTokenCookie = response.headers["set-cookie"].find((cookie) =>
+            cookie.startsWith("token="),
+        );
+        assert.match(userTokenCookie, /HttpOnly/i);
     });
 
     it("rejects duplicate registration", async () => {
@@ -167,6 +195,35 @@ describe("HTTP API integration", () => {
         await request(app).get("/api/auth/get-me").expect(401);
     });
 
+    it("limits repeated user authentication attempts", async () => {
+        for (let attempt = 0; attempt < 5; attempt += 1) {
+            await request(app).post("/api/auth/login").send({}).expect(400);
+        }
+
+        const response = await request(app)
+            .post("/api/auth/login")
+            .send({})
+            .expect(429);
+
+        assert.equal(response.body.error.code, "RATE_LIMITED");
+    });
+
+    it("limits repeated admin authentication attempts", async () => {
+        for (let attempt = 0; attempt < 5; attempt += 1) {
+            await request(app)
+                .post("/api/v1/admin/login")
+                .send({})
+                .expect(401);
+        }
+
+        const response = await request(app)
+            .post("/api/v1/admin/login")
+            .send({})
+            .expect(429);
+
+        assert.equal(response.body.error.code, "RATE_LIMITED");
+    });
+
     it("creates an admin session using the admin cookie", async () => {
         const Admin = require("../../src/models/admin.model.js");
         await Admin.create({
@@ -192,10 +249,62 @@ describe("HTTP API integration", () => {
             Admin.create({ username: "no-password-admin" }),
             mongoose.Error.ValidationError,
         );
+        await assert.rejects(
+            Admin.create({
+                username: "plaintext-password-admin",
+                passwordHash: "plaintext-password",
+            }),
+            mongoose.Error.ValidationError,
+        );
     });
 
     it("denies song upload unless the caller is authenticated as an admin", async () => {
-        await request(app).post("/api/songs").expect(401);
+        const agent = request.agent(app);
+        const csrfResponse = await agent.get("/api/csrf-token").expect(200);
+        const csrfToken = csrfResponse.headers["set-cookie"]
+            .find((cookie) => cookie.startsWith("csrf_token="))
+            .split(";")[0]
+            .slice("csrf_token=".length);
+
+        await agent
+            .post("/api/songs")
+            .set("x-csrf-token", csrfToken)
+            .expect(401);
+    });
+
+    it("rejects unsupported song file types", async () => {
+        const Admin = require("../../src/models/admin.model.js");
+        await Admin.create({
+            username: "qa-admin",
+            passwordHash: await bcrypt.hash("long-test-admin-password", 12),
+        });
+        const agent = request.agent(app);
+        const loginResponse = await agent
+            .post("/api/v1/admin/login")
+            .send({ username: "qa-admin", password: "long-test-admin-password" })
+            .expect(200);
+        const csrfToken = loginResponse.headers["set-cookie"]
+            .find((cookie) => cookie.startsWith("csrf_token="))
+            .split(";")[0]
+            .slice("csrf_token=".length);
+
+        const response = await agent
+            .post("/api/songs")
+            .set("x-csrf-token", csrfToken)
+            .field("mood", "happy")
+            .attach("song", Buffer.from("not audio"), "notes.txt")
+            .expect(415);
+
+        assert.equal(response.body.error.code, "UNSUPPORTED_MEDIA_TYPE");
+
+        const spoofedFileResponse = await agent
+            .post("/api/songs")
+            .set("x-csrf-token", csrfToken)
+            .field("mood", "happy")
+            .attach("song", Buffer.from("not audio"), "spoofed.mp3")
+            .expect(415);
+
+        assert.equal(spoofedFileResponse.body.error.code, "UNSUPPORTED_MEDIA_TYPE");
     });
 
     it("enforces a unique song mood in the database", async () => {
@@ -229,19 +338,52 @@ describe("HTTP API integration", () => {
         });
         const agent = request.agent(app);
 
-        await agent
+        const loginResponse = await agent
             .post("/api/v1/admin/login")
             .send({ username: "qa-admin", password: "long-test-admin-password" })
             .expect(200);
+        const csrfToken = loginResponse.headers["set-cookie"]
+            .find((cookie) => cookie.startsWith("csrf_token="))
+            .split(";")[0]
+            .slice("csrf_token=".length);
 
         const response = await agent
             .post("/api/songs")
+            .set("x-csrf-token", csrfToken)
             .field("mood", "happy")
-            .attach("song", Buffer.from("test audio"), "replacement.mp3")
+            .attach("song", Buffer.from("ID3\x04\x00\x00\x00\x00\x00\x00", "binary"), "replacement.mp3")
             .expect(409);
 
         assert.match(response.body.message, /delete it before uploading another/i);
         assert.equal(response.body.song.title, "Existing happy song");
+    });
+
+    it("cleans up a successful asset upload when its paired upload fails", async () => {
+        const Admin = require("../../src/models/admin.model.js");
+        await Admin.create({
+            username: "qa-admin",
+            passwordHash: await bcrypt.hash("long-test-admin-password", 12),
+        });
+        const agent = request.agent(app);
+        const loginResponse = await agent
+            .post("/api/v1/admin/login")
+            .send({ username: "qa-admin", password: "long-test-admin-password" })
+            .expect(200);
+        const csrfToken = loginResponse.headers["set-cookie"]
+            .find((cookie) => cookie.startsWith("csrf_token="))
+            .split(";")[0]
+            .slice("csrf_token=".length);
+        uploadFailureFilename = "orphaned.mp3";
+
+        const response = await agent
+            .post("/api/songs")
+            .set("x-csrf-token", csrfToken)
+            .field("mood", "happy")
+            .attach("song", Buffer.from("ID3\x04\x00\x00\x00\x00\x00\x00", "binary"), "orphaned.mp3")
+            .expect(500);
+
+        assert.equal(response.body.error.code, "INTERNAL_SERVER_ERROR");
+        assert.deepEqual(deletedFileIds, ["file-orphaned.jpeg"]);
     });
 
     it("allows an admin to delete a song and its stored files", async () => {
@@ -261,12 +403,19 @@ describe("HTTP API integration", () => {
         });
         const agent = request.agent(app);
 
-        await agent
+        const loginResponse = await agent
             .post("/api/v1/admin/login")
             .send({ username: "qa-admin", password: "long-test-admin-password" })
             .expect(200);
+        const csrfToken = loginResponse.headers["set-cookie"]
+            .find((cookie) => cookie.startsWith("csrf_token="))
+            .split(";")[0]
+            .slice("csrf_token=".length);
 
-        await agent.delete(`/api/songs/${song._id}`).expect(200);
+        await agent
+            .delete(`/api/songs/${song._id}`)
+            .set("x-csrf-token", csrfToken)
+            .expect(200);
 
         assert.equal(await Song.countDocuments({ mood: "happy" }), 0);
         assert.deepEqual(deletedFileIds.sort(), [
