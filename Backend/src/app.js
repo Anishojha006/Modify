@@ -1,5 +1,5 @@
 const express = require("express");
-const cors = require("cors");
+// const cors = require("cors");
 const path = require("path");
 const Authrouter = require("./routes/auth.routes.js");
 const cookieParser = require("cookie-parser");
@@ -12,12 +12,12 @@ const allowedOrigins = (process.env.CORS_ORIGIN || "http://localhost:5173")
 	.map((origin) => origin.trim())
 	.filter(Boolean);
 
-app.use(cors({
-	origin: (origin, callback) => {
-		callback(null, !origin || allowedOrigins.includes(origin));
-	},
-	credentials: true,
-}));
+// app.use(cors({
+// 	origin: (origin, callback) => {
+// 		callback(null, !origin || allowedOrigins.includes(origin));
+// 	},
+// 	credentials: true,
+// }));
 
 app.use(express.json());
 app.use(cookieParser());
