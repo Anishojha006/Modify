@@ -3,11 +3,13 @@ const adminModel = require("../models/admin.model.js");
 const jwt = require("jsonwebtoken");
 const redis = require("../config/cache.js");
 
+const { setCsrfTokenCookie } = require("../middlewares/csrf.middleware.js");
+
 function getAdminCookieOptions() {
     return {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+        sameSite: "lax",
         path: "/",
         maxAge: 3 * 24 * 60 * 60 * 1000,
     };
@@ -58,7 +60,7 @@ async function adminLogin(req, res) {
         }, process.env.SECRET_KEY, { expiresIn: "3d" })
 
         res.cookie("admin_token", token, getAdminCookieOptions());
-
+        setCsrfTokenCookie(res);
 
         res.status(200).json({
             message: "Credentials verified successfully.",
@@ -143,6 +145,7 @@ async function adminlogout(req, res) {
     const remainingTime = decoded.exp - Math.floor(Date.now() / 1000);
 
     res.clearCookie("admin_token");
+    res.clearCookie("csrf_token", { httpOnly: false, sameSite: "lax", secure: process.env.NODE_ENV === "production", path: "/" });
 
     if (remainingTime > 0) {
         await redis.set(

@@ -5,6 +5,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 const redis = require("../config/cache.js");
+const { setCsrfTokenCookie } = require("../middlewares/csrf.middleware.js");
 
 const SESSION_DURATION = 3 * 24 * 60 * 60 * 1000;
 
@@ -12,8 +13,7 @@ function getCookieOptions(expiresAt) {
     return {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-        sameSite:
-            process.env.NODE_ENV === "production" ? "none" : "lax",
+        sameSite: "lax",
         path: "/",
         expires: expiresAt,
     };
@@ -62,6 +62,7 @@ async function createDeviceSession(req, res, user, statusCode = 200) {
 
     res.cookie("token", token, cookieOptions);
     res.cookie("device_secret", deviceSecret, cookieOptions);
+    setCsrfTokenCookie(res);
 
     return res.status(statusCode).json({
         message:
@@ -268,13 +269,13 @@ async function logout(req, res) {
         const cookieOptions = {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
-            sameSite:
-                process.env.NODE_ENV === "production" ? "none" : "strict",
+            sameSite: "lax",
             path: "/",
         };
 
         res.clearCookie("token", cookieOptions);
         res.clearCookie("device_secret", cookieOptions);
+        res.clearCookie("csrf_token", { ...cookieOptions, httpOnly: false });
 
         return res.status(200).json({
             message: "Successfully logged out",
