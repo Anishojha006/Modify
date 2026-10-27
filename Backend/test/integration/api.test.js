@@ -91,11 +91,24 @@ describe("HTTP API integration", () => {
         const response = await request(app).get("/health").expect(200);
         assert.deepEqual(response.body, { status: "ok" });
         assert.equal(response.headers["x-powered-by"], undefined);
+        assert.equal(response.headers["x-content-type-options"], "nosniff");
+        assert.equal(response.headers["x-frame-options"], "SAMEORIGIN");
     });
 
     it("reports readiness only after database and Redis are connected", async () => {
         const response = await request(app).get("/ready").expect(200);
         assert.deepEqual(response.body, { status: "ready" });
+    });
+
+    it("reports not ready when Redis is unavailable", async () => {
+        redis.status = "end";
+
+        try {
+            const response = await request(app).get("/ready").expect(503);
+            assert.deepEqual(response.body, { status: "not_ready" });
+        } finally {
+            redis.status = "ready";
+        }
     });
 
     it("returns a standard error for unknown API routes", async () => {

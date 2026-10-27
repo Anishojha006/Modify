@@ -79,6 +79,11 @@ npm test
 
 `Backend/test/integration/api.test.js` starts and stops its own in-memory MongoDB instance. It mocks Redis and does not upload files to ImageKit.
 
+The GitHub Actions workflow runs backend tests, frontend lint and unit tests,
+Chromium browser tests, and a frontend production build on every push and pull
+request. The browser tests run in a real Chromium browser but mock API responses;
+they do not exercise deployed services.
+
 ## Environment and coverage limits
 
 - Integration tests use an ephemeral MongoDB database named
@@ -87,6 +92,9 @@ npm test
   service availability.
 - Browser E2E tests mock API responses. They validate selected frontend flows,
   not deployed end-to-end behavior.
+- Backend tests check basic Helmet headers and the readiness response when
+  Redis is unavailable. They cannot verify a hosting provider's HTTPS
+  termination, external security-header behavior, or proxy settings.
 - Production limits are backed by Redis; configure `TRUST_PROXY` only for the
   deployment's actual proxy topology.
 - No automated backup, restore, load, or production monitoring checks are

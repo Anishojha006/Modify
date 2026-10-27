@@ -23,6 +23,11 @@ application does not include production instances of these dependencies.
   configuration when possible.
 - Use a randomly generated `SECRET_KEY` of at least 32 characters. Never commit
   secrets or use production credentials in local tests.
+- Keep backend credentials in the hosting provider's secret manager. The
+  `Backend/.env.example` file contains names only. `Frontend/.env.production`
+  contains the public same-origin API path and is read when building the
+  frontend; never put credentials or private keys in frontend `VITE_*` values.
+  Environment files other than `.env.example` are ignored by Git.
 - Set `NODE_ENV=production`. If the frontend and API use different origins,
   set `CORS_ORIGIN` to the exact frontend origin (scheme and hostname, with no
   trailing slash); multiple origins can be comma-separated. It can be omitted
@@ -37,26 +42,39 @@ application does not include production instances of these dependencies.
   check to request `/ready`. The server waits for Redis and MongoDB at startup
   and closes both connections during graceful shutdown.
 
-Production builds default `VITE_API_URL` to `/api/auth`, so the same-origin
-API works without extra frontend configuration. Override it at build time only
-if the API is hosted at a different origin. Localhost API URLs are ignored by
-production builds and resolve to the same-origin API instead. Keep HTTPS
-enabled in production for secure authentication cookies.
+Production builds use `Frontend/.env.production`, currently set to
+`VITE_API_URL=/api/auth`, so the same-origin API works with no extra frontend
+configuration. Override it at build time only if the API is hosted at a
+different origin. Localhost API URLs are ignored by production builds and
+resolve to the same-origin API instead. Keep HTTPS enabled in production for
+secure authentication cookies.
 
 ## Release checklist
 
 - Run `npm ci`, `npm audit --omit=dev`, `npm test`, `npm run lint`, and
   `npm run build` from the relevant backend and frontend directories.
 - Run the browser E2E suite against the intended deployment configuration.
+- CI runs backend tests, frontend lint/unit tests, Chromium browser tests, and a
+  frontend production build on pushes and pull requests. CI does not deploy.
 - Confirm the application can connect to the production MongoDB and Redis
   services, and verify `/ready` changes to `503` when either dependency is
   unavailable.
 - Enable automated, encrypted MongoDB backups and perform a restore exercise
   before launch. This repository does not configure backups.
 - Configure centralized logs, error alerts, uptime monitoring, and a process
-  restart policy. This repository does not include an observability provider.
+  restart policy. Alert on repeated `/ready` failures, elevated 5xx rates, and
+  sustained latency; verify a restart and dependency-recovery drill. This
+  repository does not include an observability provider or configure backups.
 - Verify the hosting provider's TLS, firewall, trusted-proxy chain, Redis
   persistence, and ImageKit access policies.
+- From an external network, verify HTTPS redirects/certificate validity and
+  inspect production response headers (including HSTS, `X-Content-Type-Options`,
+  and `X-Frame-Options`) after deployment. Local tests cannot verify the
+  provider's TLS termination or proxy configuration.
+- Run a load test on staging using an agreed traffic profile and capacity
+  limits; measure API latency, error rate, and resource use while exercising
+  authenticated and song-fetch flows. Do not send load to production without
+  explicit approval and a provider-approved limit.
 - Test upload rejection, API rate limits, authentication, CSRF protection, and
   session revocation against a staging environment before public release.
 
