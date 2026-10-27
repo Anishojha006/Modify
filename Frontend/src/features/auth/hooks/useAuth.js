@@ -1,5 +1,5 @@
 import { useContext } from "react";
-import { AuthContext } from "../auth.context.jsx";
+import { AuthContext } from "../auth.context.value.js";
 import {
     logout,
     register,

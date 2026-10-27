@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAdmin } from "../admin.context.jsx";
+import { useAdmin } from "../useAdmin.js";
 import "../style/Logout.scss";
 import { getErrorMessage } from "../../../services/errorMessage.js";
 

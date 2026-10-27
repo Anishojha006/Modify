@@ -1,7 +1,6 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
+import { AdminContext } from "./admin.context.value.js";
 import { getme, login, logout } from "./services/admin.service.js";
-
-const AdminContext = createContext(null);
 
 export const AdminProvider = ({ children }) => {
     const [admin, setAdmin] = useState(null);
@@ -51,14 +50,4 @@ export const AdminProvider = ({ children }) => {
             {children}
         </AdminContext.Provider>
     );
-};
-
-export const useAdmin = () => {
-    const context = useContext(AdminContext);
-
-    if (!context) {
-        throw new Error("useAdmin must be used inside AdminProvider");
-    }
-
-    return context;
 };

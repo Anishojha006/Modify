@@ -16,6 +16,7 @@ const FaceExpression = () => {
     const faceLandmarkerRef = useRef(null);
     const streamRef = useRef(null);
     const setupTokenRef = useRef(null);
+    const detectionInProgressRef = useRef(false);
 
     const [expression, setExpression] =
         useState("Camera loading...");
@@ -33,38 +34,45 @@ const FaceExpression = () => {
         useState(false);
  
     const handleDetectExpression = async () => {
-        preparePlayback();
+        if (detectionInProgressRef.current) return;
 
-        let detectedExpression;
-        try {
-            detectedExpression = await detectExpression({
-                videoRef,
-                faceLandmarkerRef,
-                setLoading: setDetecting,
-                setError,
-                setExpression,
-            });
-        } catch (error) {
-            console.error("Unable to detect expression:", error);
-            setError("Unable to detect an expression. Please try again.");
-            restorePlaybackAudio();
-            return;
-        }
-
-        console.log(detectedExpression);
-        if (!detectedExpression || detectedExpression === "no-face") {
-            restorePlaybackAudio();
-            return;
-        }
+        detectionInProgressRef.current = true;
+        setDetecting(true);
 
         try {
-            await handleGetSongs({ mood: detectedExpression });
+            preparePlayback();
+
+            let detectedExpression;
+            try {
+                detectedExpression = await detectExpression({
+                    videoRef,
+                    faceLandmarkerRef,
+                    setError,
+                    setExpression,
+                });
+            } catch (error) {
+                console.error("Unable to detect expression:", error);
+                setError("Unable to detect an expression. Please try again.");
+                return;
+            }
+
+            if (!detectedExpression || detectedExpression === "no-face") return;
+
+            try {
+                await handleGetSongs({ mood: detectedExpression });
+            } catch (error) {
+                console.error("Unable to load a song for the detected expression:", error);
+                setError(getErrorMessage(
+                    error,
+                    "Expression detected, but a matching song could not be loaded."
+                ));
+            }
         } catch (error) {
-            console.error("Unable to load a song for the detected expression:", error);
-            setError(getErrorMessage(
-                error,
-                "Expression detected, but a matching song could not be loaded."
-            ));
+            console.error("Unable to process detected expression:", error);
+            setError("Unable to process the detected expression. Please try again.");
+        } finally {
+            detectionInProgressRef.current = false;
+            setDetecting(false);
             restorePlaybackAudio();
         }
     };

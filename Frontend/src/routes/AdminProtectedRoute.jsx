@@ -1,6 +1,6 @@
 import { Navigate } from "react-router-dom";
 import Loader from "../features/auth/components/Loader.jsx";
-import { useAdmin } from "../features/admin/admin.context.jsx";
+import { useAdmin } from "../features/admin/useAdmin.js";
 
 const AdminProtectedRoute = ({ children }) => {
     const { admin, loading } = useAdmin();

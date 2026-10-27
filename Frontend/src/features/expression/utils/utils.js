@@ -114,7 +114,6 @@ export function getExpression(blendshapes) {
 export async function detectExpression({
     videoRef,
     faceLandmarkerRef,
-    setLoading,
     setError,
     setExpression,
 }) {
@@ -136,7 +135,6 @@ export async function detectExpression({
     }
 
     try {
-        setLoading(true);
         setError("");
 
         const result =
@@ -193,8 +191,6 @@ export async function detectExpression({
 
         return null;
 
-    } finally {
-        setLoading(false);
     }
 }
 

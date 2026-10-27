@@ -1,5 +1,5 @@
 import { useContext } from "react";
-import { SongContext } from "../context/song.context.jsx";
+import { SongContext } from "../context/song.context.value.js";
 import { getSongs } from "../services/song.api.js";
 
 export const useSong = () => {

@@ -1,6 +1,5 @@
-import { createContext, useCallback, useRef, useState } from "react";
-
-export const SongContext = createContext();
+import { useCallback, useRef, useState } from "react";
+import { SongContext } from "./song.context.value.js";
 
 export const SongContextProvider = ({ children }) => {
     const [song, setSong] = useState({
