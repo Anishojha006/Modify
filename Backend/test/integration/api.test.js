@@ -255,6 +255,35 @@ describe("HTTP API integration", () => {
         assert.equal(response.body.admin.role, "admin");
     });
 
+    it("allows an admin to log out after refreshing the CSRF token", async () => {
+        const Admin = require("../../src/models/admin.model.js");
+        await Admin.create({
+            username: "qa-admin",
+            passwordHash: await bcrypt.hash("long-test-admin-password", 12),
+        });
+        const agent = request.agent(app);
+
+        await agent
+            .post("/api/v1/admin/login")
+            .send({ username: "qa-admin", password: "long-test-admin-password" })
+            .expect(200);
+
+        await agent.post("/api/v1/admin/logout").expect(403);
+
+        const csrfResponse = await agent.get("/api/csrf-token").expect(200);
+        const csrfToken = csrfResponse.headers["set-cookie"]
+            .find((cookie) => cookie.startsWith("csrf_token="))
+            .split(";")[0]
+            .slice("csrf_token=".length);
+
+        await agent
+            .post("/api/v1/admin/logout")
+            .set("x-csrf-token", csrfToken)
+            .expect(200);
+
+        await agent.get("/api/v1/admin/getme").expect(401);
+    });
+
     it("does not create an admin with a default plaintext password", async () => {
         const Admin = require("../../src/models/admin.model.js");
 

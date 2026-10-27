@@ -9,6 +9,11 @@ const api = axios.create({
     withCredentials: true,
 });
 
+const csrfApi = axios.create({
+    baseURL: apiRootUrl,
+    withCredentials: true,
+});
+
 api.interceptors.request.use((config) => attachCsrfHeader(config));
 
 
@@ -30,6 +35,7 @@ export async function getme() {
 }
 
 export async function logout() {
+    await csrfApi.get("/api/csrf-token");
     const response = await api.post("/logout");
     return response.data;
 }
